@@ -19,6 +19,7 @@
         <a href="/" class="navbar-brand">{{#if name}}{{name}} &ndash; {{/if}}Solid Home</a>
       </div>
       <div class="navbar-right">
+        <a id="logged-href" href="" title="" style="display:none">Logged&nbspIn</a>
         <button id="session-action" type="button" class="session-action btn btn-default navbar-btn">Loading...</button>
       </div>
     </div>
@@ -122,15 +123,27 @@
   function render() {
     const { session } = state
     const actionButton = sessionActionButton()
+    const logged_href = sessionLogged_href()
     if (!session) {
       actionButton.innerText = 'Log in'
+      logged_href.style.display = 'none'
+      logged_href.href = "";
+      logged_href.title = "";
     } else {
       actionButton.innerText = 'Log out'
+      if (session.webId) {
+        logged_href.style.display = 'initial'
+        logged_href.href = session.webId;
+        logged_href.title = session.webId;
+      }
     }
   }
 
   function sessionActionButton() {
     return document.getElementById('session-action')
+  }
+  function sessionLogged_href() {
+    return document.getElementById('logged-href')
   }
 
   document.addEventListener('DOMContentLoaded', main)
