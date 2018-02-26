@@ -1,8 +1,8 @@
-<form method="post" action="/login/tls">
+<form id="tls" method="post" action="/login/tls">
   <div class="form-group">
 
     <button type="submit" class="btn btn-primary" id="login-tls">
-      With Certificate (WebId-TLS)
+      With Certificate (WebId+Delegate-TLS)
     </button>
 
     {{> auth/auth-hidden-fields}}
@@ -12,10 +12,19 @@
 <script type="text/javascript">
   const button = document.getElementById('login-tls')
   button.addEventListener('click', function(event) {
-    event.preventDefault()
-    fetch('/login/tls',
-       { method: 'POST', credentials: 'include'})
-      .then(function(response) {
+    const client_id = document.querySelector('#tls #client_id')
+    const scope = document.querySelector('#tls #scope')
+    const request = document.querySelector('#tls #request')
+
+    if (client_id && scope && request 
+        && client_id.value.length == 0
+        && scope.value.length == 0
+        && request.value.length == 0) {
+
+      event.preventDefault()
+      fetch('/login/tls',
+        { method: 'POST', credentials: 'include'})
+       .then(function(response) {
           const webId = response.headers.get('user')
           const idp = new URL(webId).origin
           const session = { authType: 'WebID-TLS', webId, idp }
@@ -36,6 +45,7 @@
             } catch(err) {
             }
           })
-      })
+       })
+    }
   })
 </script>
