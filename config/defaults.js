@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = {
-  'auth': 'oidc',
+  'auth': 'tls',
   'localAuth': {
     'tls': true,
     'password': true
