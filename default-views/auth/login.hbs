@@ -18,7 +18,18 @@
       </div>
     </div>
   {{/if}}
+    <div class="row" id="error" style="display:none">
+      <div class="col-md-12">
+        <p class="text-danger"><strong id="error_msg">test</strong></p>
+      </div>
+    </div>
+
   <div class="row">
+  {{#if authTls}}
+    <div class="col-md-5">
+      {{> auth/login-auth-tls}}
+    </div>
+  {{else}}
     <div class="col-md-5">
       {{#if enablePassword}}
         {{> auth/login-username-password}}
@@ -30,7 +41,10 @@
         {{> auth/login-tls}}
       {{/if}}
     </div>
+
+  {{/if}}
   </div>
+
 </div>
 
 <div class="container">
@@ -44,6 +58,7 @@
       </div>
     </div>
 
+   {{#if enablePassword}}
     <div class="col-md-6">
       <div>Forgot password?
         <a class="btn btn-xs btn-default"
@@ -52,6 +67,7 @@
         </a>
       </div>
     </div>
+    {{/if}}
   </div>
 </div>
 </body>

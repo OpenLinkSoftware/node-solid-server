@@ -4,7 +4,7 @@ module.exports = {
   'auth': 'tls',
   'localAuth': {
     'tls': true,
-    'password': true
+    'password': false
   },
   'configPath': './config',
   'dbPath': './.db',
