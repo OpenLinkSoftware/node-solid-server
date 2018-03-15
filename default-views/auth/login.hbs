@@ -20,7 +20,7 @@
   {{/if}}
     <div class="row" id="error" style="display:none">
       <div class="col-md-12">
-        <p class="text-danger"><strong id="error_msg">test</strong></p>
+        <p class="text-danger"><strong id="error_msg"></strong></p>
       </div>
     </div>
 
@@ -34,14 +34,11 @@
       {{#if enablePassword}}
         {{> auth/login-username-password}}
       {{/if}}
-    </div>
-    <div class="col-md-1"><br /></div>
-    <div class="col-md-6">
+
       {{#if enableTls}}
         {{> auth/login-tls}}
       {{/if}}
     </div>
-
   {{/if}}
   </div>
 
