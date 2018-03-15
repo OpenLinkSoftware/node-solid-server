@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html id="docHTML">
 <head>
-    <link type="text/css" rel="stylesheet" href="/common/css/tabbedtab.css" />
-<!--    <link type="text/css" rel="stylesheet" href="/common/css/mash.css" /> -->
+    <link type="text/css" rel="stylesheet" href="/common/css_timbl/tabbedtab.css" />
     <script>
       var $SOLID_GLOBAL_config = {
         popupUri: window.location.origin + '/common/popup.html'
       }
     </script>
-    <script type="text/javascript" src="/common/js/mashlib.min.js"></script>
-    <script>
+<script type="text/javascript" src="/common/js_timbl/mashlib.js"></script>
+<script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-      var UI = require('mashlib')
-      var $rdf = UI.rdf
-      $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/proxy?uri={uri}';
+  document.addEventListener('DOMContentLoaded', function() {
 
-        UI.authn.checkUser()
-          .then(function () {
+    const panes  = require('mashlib')
+    const UI = panes.UI
+    const $rdf = UI.rdf
 
-            var uri = window.location.href
-            window.document.title = uri
-            var kb = UI.store;
-            var subject = kb.sym(uri);
-            UI.outline.GotoSubject(subject, true, undefined, true, undefined);
-          })
-      })
-    </script>
+    // UI.config = { idpSelectUri:  'https://timbl.com/timbl/Automation/Library/Mashup/idp-select-ui.html',
+    //               callbackUri:  'https://timbl.com/timbl/Automation/Library/Mashup/idp-callback.html'
+    //  }
+
+    $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/proxy?uri={uri}';
+    var uri = window.location.href;
+
+    // UI.authn.checkUser()
+
+    // tabulator = {}
+
+    window.document.title = 'Loading ' + uri
+    var kb = UI.store
+    var subject = kb.sym(uri)
+    var outliner = panes.getOutliner(document)
+    outliner.GotoSubject(subject, true, undefined, true, undefined);
+      
+  })
+</script>
 </head>
 <body>
 <div class="TabulatorOutline" id="DummyUUID">
