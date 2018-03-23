@@ -6,6 +6,9 @@
 
     acl:agent
         <{{webId}}>;
+{{#if add_owl_sameAs}}
+    acl:agent  <{{extWebId}}>;
+{{/if}}
 
     acl:accessTo </index.html>;
 
