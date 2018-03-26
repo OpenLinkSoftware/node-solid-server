@@ -43,12 +43,12 @@
   <div class="row" id="update_profile" style="display:none">
     <div class="col-md-12">
       <p class="lead">
-        You must add the next relation to your TLS Certificate profile or click "Update profile" button for try fix it.
+        Regarding WebID-TLS+Delegation protocol, add the following RDF statement to your Delegates WebID-Profile Document or click "Update WebID-Profile Doc" to attempt this action right now.
         <pre>
-         &lt;{{tls_cert_webid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
+&lt;{{tls_cert_webid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
         </pre>
         <span>
-          <input id="load_btn" class="btn btn-primary" value=" Update profile " type="button">
+          <input id="load_btn" class="btn btn-primary" value=" Update WebID-Profile Doc " type="button">
         </span>
       </p>
     </div>
@@ -201,7 +201,7 @@
         if (response.ok) {
           return response.text();
         }
-        throw new Error('Network response was not ok. '+response.statusText);
+        throw new Error('Network response was not ok. HTTP='+response.status+'  '+response.statusText);
       })
       .then(function(text) {
 
@@ -216,7 +216,7 @@
       })
       .then(function(response) {
         if (!response.ok) {
-          throw new Error('Network update request was not ok. '+response.statusText);
+          throw new Error('Network update request was not ok. HTTP='+response.status+'  '+response.statusText);
         }
 /***
         var msg = '<?xml version="1.0" encoding="utf-8" ?>'+
