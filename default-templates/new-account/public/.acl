@@ -6,7 +6,7 @@
 <#owner>
     a acl:Authorization;
     acl:agent <{{webId}}>;
-{{#if add_owl_sameAs}}
+{{#if addOwlSameAs}}
     acl:agent <{{extWebId}}>;
 {{/if}}
     acl:accessTo <./>;
