@@ -151,18 +151,18 @@
   function render() {
     const { session } = state
     const actionButton = sessionActionButton()
-    const logged_href = sessionLogged_href()
+    const loggedHref = sessionLoggedHref()
     if (!session) {
       actionButton.innerText = 'Log in'
-      logged_href.style.display = 'none'
-      logged_href.href = "";
-      logged_href.title = "";
+      loggedHref.style.display = 'none'
+      loggedHref.href = ""
+      loggedHref.title = ""
     } else {
       actionButton.innerText = 'Log out'
       if (session.webId) {
-        logged_href.style.display = 'initial'
-        logged_href.href = session.webId;
-        logged_href.title = session.webId;
+        loggedHref.style.display = 'initial'
+        loggedHref.href = session.webId
+        loggedHref.title = session.webId
       }
     }
   }
@@ -170,7 +170,7 @@
   function sessionActionButton() {
     return document.getElementById('session-action')
   }
-  function sessionLogged_href() {
+  function sessionLoggedHref() {
     return document.getElementById('logged-href')
   }
 
