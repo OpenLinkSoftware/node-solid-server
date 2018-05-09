@@ -141,6 +141,7 @@
       SolidAuthClient
         .logout()
         .then(saveSession)
+        .then(clearData)
     } else {
       SolidAuthClient
         .popupLogin({ popupUri })
@@ -167,6 +168,11 @@
     }
   }
 
+  function clearData() {
+    document.cookie = 'connect.sid=;expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    localStorage.removeItem('solid-auth-client')
+  }
+	
   function sessionActionButton() {
     return document.getElementById('session-action')
   }
