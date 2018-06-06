@@ -3448,31 +3448,14 @@ var currentSession = exports.currentSession = function () {
   };
 }();
 
-var logout = exports.logout = function logout(storage, idp
-/**
-  fetch(idp + '/logout', { method: 'GET', credentials: 'include'})
-  .catch(err => {
-      console.warn('Error logging out of the WebID-OIDC session')
-      console.error(err)
-  })
-  .then( x => {
-    getStoredRp(storage)
-      .then(rp => (rp ? rp.logout() : undefined))
-      .catch(err => {
-        console.warn('Error logging out of the WebID-OIDC session')
-        console.error(err)
-      })
-  })
-***/
-) {
+var logout = exports.logout = function logout(storage, idp) {
   return getStoredRp(storage).then(function (rp) {
     return rp ? rp.logout() : undefined;
   }).catch(function (err) {
     console.warn('Error logging out of the WebID-OIDC session');
     console.error(err);
   }).then(function (x) {
-    console.warn('fetch logout');
-    fetch(idp + '/logout', { method: 'GET', credentials: 'include' });
+    return fetch(idp + '/logout', { method: 'GET', credentials: 'include' });
   }).catch(function (err) {
     console.warn('Error logging out of the WebID-OIDC session');
     console.error(err);
