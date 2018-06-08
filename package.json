@@ -64,7 +64,7 @@
     "nomnom": "^1.8.1",
     "oidc-auth-manager": "git+https://github.com/OpenLinkSoftware/oidc-auth-manager.git#openlink",
     "oidc-op-express": "^0.0.3",
-    "rdflib": "^0.16.2",
+    "rdflib": "git+https://github.com/OpenLinkSoftware/rdflib.js.git#openlink",
     "recursive-readdir": "^2.1.0",
     "request": "^2.72.0",
     "rimraf": "^2.5.0",
@@ -77,7 +77,7 @@
     "uuid": "^3.0.0",
     "valid-url": "^1.0.9",
     "vhost": "^3.0.2",
-    "webid": "^0.3.7"
+    "webid": "git+https://github.com/OpenLinkSoftware/node-webid.git#openlink"
   },
   "optionalDependencies": {
     "x509": "^0.3.2"
