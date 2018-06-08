@@ -30,7 +30,11 @@
         return response
       })
       .then(function(response) {
-        window.location.href = response.url
+        // Temporary solution to restore return URL
+        // until https://github.com/solid/oidc-auth-manager/issues/17 is resolved
+        const returnToUrl = localStorage.getItem('returnToUrl')
+        localStorage.removeItem('returnToUrl')
+        window.location.href = returnToUrl || '/'
       })
   })
 </script>
