@@ -165,13 +165,10 @@ describe('LoginRequest', () => {
 
   describe('postLoginUrl()', () => {
     it('should return the user account uri if no redirect_uri param', () => {
-      const accManager = AccountManager.from({ host, authMethod, multiuser: true })
+      let request = new LoginRequest({ authQueryParams: {} })
 
-      let options = { accountManager: accManager, authQueryParams: {} }
-      let request = new LoginRequest(options)
-
-      let aliceAccount = 'https://alice.localhost:8443'
-      let user = { username: 'alice', accountUri: aliceAccount }
+      let aliceAccount = 'https://alice.example.com'
+      let user = { accountUri: aliceAccount }
 
       expect(request.postLoginUrl(user)).to.equal(aliceAccount)
     })
