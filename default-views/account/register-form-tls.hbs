@@ -1,4 +1,4 @@
-<form method="post" action="/api/accounts/new">
+<form method="post" id="reg-form" action="/api/accounts/new">
   <div class="form-group">
     {{#if error}}
       <div class="row">
@@ -34,14 +34,19 @@
       <div class="col-md-6">&nbsp;</div>
     </div>
     <input type="hidden" name="returnToUrl" value="{{returnToUrl}}" />
+    <input type="hidden" name="certificatePEM" id="certificatePEM" value="" />
+    <input type="hidden" name="certificatePKCS12" id="certificatePKCS12" value="" />
+
+    {{> auth/auth-hidden-fields}}
   </div>
+</form>
+
+{{> account/register-certdata}}
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-2">
         <button type="submit" class="btn btn-primary" id="register">Register</button>
-
-        {{> auth/auth-hidden-fields}}
       </div>
 
       <div class="col-md-10">
@@ -54,4 +59,6 @@
       </div>
     </div>
   </div>
-</form>
+
+{{> account/register-cert-popup}}
+

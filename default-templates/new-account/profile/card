@@ -39,11 +39,12 @@
 {{#if tlsCertWebid}}
 :me
     acl:delegates <{{tlsCertWebid}}> ; # Delegation Relations for Software Agent 
-    cert:key [
-               a cert:RSAPublicKey ;
-               cert:exponent   "65537"^^xsd:int ;
-               cert:modulus    "00"^^xsd:hexBinary
-             ] .
+    cert:key :key-stub .
+
+:key-stub    
+    a cert:RSAPublicKey ;
+    cert:exponent   "65537"^^xsd:int ;
+    cert:modulus    "00"^^xsd:hexBinary .
 
 <{{tlsCertWebid}}>
     cert:key [

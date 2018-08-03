@@ -10,6 +10,11 @@
       margin-right: 15px;
     }
   </style>
+
+  <script src="common/js/jquery.min.js"></script>
+  <script src="common/js/bootstrap.min.js"></script>
+  <script src="common/js/forge.min.js"></script>
+
 </head>
 <body>
 <div class="container">
@@ -34,6 +39,7 @@
       <p class="lead">
         <span>
           This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
+          <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
         </span>
       </p>
     </div>
@@ -96,9 +102,121 @@
     </div>
   </section>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="certModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:400px" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Create and register certificate</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" id="name" value="{{name}}" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <label for="cert_Org">Organization:</label>
+            <input type="text" class="form-control" id="cert_Org" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="cert_State">State:</label>
+            <input type="text" class="form-control" id="cert_State" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label for="cert_Country">Country:</label>
+            <input type="text" class="form-control" id="cert_Country" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <label for="cert_pwd">Password for PKCS12 certificate :</label>
+            <input type="password" class="form-control" id="cert_pwd" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="cert_pwd1">Confirm Password:</label>
+            <input type="password" class="form-control" id="cert_pwd1" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id="gen_cert" type="button" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="certReadyModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:400px" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Register certificate on server</h4>
+      </div>
+      <div class="modal-body">
+        <div id="cert_wait">
+         <img src="common/css/throbber.gif" width="16" /> Wait...
+        </div>
+        <section id="p12-cert">
+           <h5>PKCS12 Certificate</h5>
+           <a id="pkcs12-download" download="certificate.p12">Download PKCS12</a>
+           <br/>
+           <h5 id="p12-cert-note" >Please save certificate on local disk and click Register.</h5>
+        </section>
+        </p>
+        <section id="cert-done">
+           <h5><b>The following actions have been applied re. WebID-TLS protocol usage:</b></h5>
+           <h5>1. WebID-Profile Relations Update re. Public Key (modulus and exponent)</h5>
+           <h5>2. PKCS#12 identity card saved to ~profile folder</h5>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id="upload_cert" type="button" class="btn btn-primary">Register</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 <script src="/common/js/solid-auth-client.bundle.js"></script>
 <script type="text/javascript">
+  let certData = {};
   const popupUri = window.location.origin + '/common/popup.html'
   const stateData = {
     session: null
@@ -114,7 +232,7 @@
     if (window.location.hash === '#init') {
       let update_block = document.querySelector('#update_profile');
       if (update_block)
-        update_block.style.display="block";
+        update_block.style.display='block';
     }
     // Render the session state
     SolidAuthClient
@@ -129,6 +247,13 @@
     const button = document.getElementById('load_btn')
     if (button)
       button.addEventListener('click', updateData)
+
+    const btnShowGenCert = document.getElementById('update_cert')
+    btnShowGenCert.addEventListener('click', showGenCertificate)
+    const btnGenCert = document.getElementById('gen_cert')
+    btnGenCert.addEventListener('click', genCertificate)
+    const btnUploadCert = document.getElementById('upload_cert')
+    btnUploadCert.addEventListener('click', uploadCertificate)
   }
 
   function saveSession(session) {
@@ -147,6 +272,12 @@
       SolidAuthClient
         .popupLogin({ popupUri })
         .then(saveSession)
+        .then( () => {  /* fetch prefs.ttl for force receive connect.sid cookie */
+          SolidAuthClient
+            .fetch(location.origin + '/settings/prefs.ttl',
+                   { credentials: 'include' }
+                  )
+        })
     }
   }
 
@@ -157,8 +288,9 @@
     if (!session) {
       actionButton.innerText = 'Log in'
       loggedHref.style.display = 'none'
-      loggedHref.href = ""
-      loggedHref.title = ""
+      loggedHref.href = ''
+      loggedHref.title = ''
+      document.getElementById('update_cert').disabled = true
     } else {
       actionButton.innerText = 'Log out'
       if (session.webId) {
@@ -166,6 +298,7 @@
         loggedHref.href = session.webId
         loggedHref.title = session.webId
       }
+      document.getElementById('update_cert').disabled = false
     }
   }
 
@@ -192,61 +325,199 @@
 
       event.preventDefault()
 
+      var query = `INSERT { <${prof_url}> <http://www.openlinksw.com/schemas/cert#onBehalfOf>  <${delegator}> . }`;
+
       fetch(file_url.href,
-        { method: 'GET', 
+        { method: 'PATCH', 
           headers: {
-            'Accept': 'text/turtle; charset=utf-8'
+            'Content-Type': 'application/sparql-update; charset=utf-8'
           },
-          credentials: 'include'
+          credentials: 'include', 
+          body: query
         })
-      .then(function(response) {
-        if (response.ok) {
-          return response.text()
-        }
-        throw new Error('Network response was not ok. HTTP='+response.status+'  '+response.statusText)
-      })
-      .then(function(text) {
-
-        return fetch(file_url.href,
-          { method: 'PUT', 
-            headers: {
-              'Content-Type': 'text/turtle; charset=utf-8'
-            },
-            credentials: 'include', 
-            body: text+rel_add
-          })
-      })
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error('Network update request was not ok. HTTP='+response.status+'  '+response.statusText)
-        }
-/***
-        var msg = '<?xml version="1.0" encoding="utf-8" ?>'+
-            '<D:propertyupdate xmlns:D="DAV:"><D:set><D:prop>'+
-            '<virtpermissions xmlns="http://www.openlinksw.com/virtuoso/webdav/1.0/">110100100RM</virtpermissions>'+
-            '</D:prop></D:set></D:propertyupdate>'
-
-        fetch(file_url.href,
-          { method: 'POST', 
-            headers: {
-              'Content-Type': 'text/xml; charset=utf-8'
-            },
-            credentials: 'include', 
-            body: msg
-        })
-        .then(function(response) {
-          alert('Attr: '+response.statusText);
-        })
-        .catch(function(error) {})
-***/
-        alert('Your profile file '+prof_url+' was updated.')
-            
-      })
+       .then(function(response) {
+          if (!response.ok) {
+            throw new Error('Network update request was not ok. HTTP='+response.status+'  '+response.statusText)
+          }
+          alert('Your profile file '+prof_url+' was updated.')
+       })
        .catch(function(error) {
-         alert(error)
+         alert(error);
        }) 
+  }
+
+  function showGenCertificate() {
+
+    document.getElementById('cert_pwd').value = ''
+    document.getElementById('cert_pwd1').value = ''
+    document.getElementById('upload_cert').disabled = true
+    document.getElementById('cert-done').hidden = true
+    $('#certModal').modal('show')
+  }
+
+
+  function genCertificate() {
+    certData = {};
+
+    let webId = '{{webId}}'
+    let name = document.getElementById('name').value;
+    let email = document.getElementById('email').value;
+    let certOrg = document.getElementById('cert_Org').value;
+    let certState = document.getElementById('cert_State').value;
+    let certCountry = document.getElementById('cert_Country').value;
+    let certPwd = document.getElementById('cert_pwd').value;
+    let certPwd1 = document.getElementById('cert_pwd1').value;
+
+    if (certPwd.length < 1)  {
+      alert('Certificate password could not be empty')
+      return
+    }
+    if (certPwd != certPwd1)  {
+      alert('Confirm certificate password with properly value')
+      return
+    }
+
+    if (certCountry.length > 0 && certCountry.length!=2) {
+      alert('Country must be two characters')
+      return
+    }
+    if (name.length < 1) {
+      alert('Name is empty')
+      return
+    }
+
+    document.getElementById('cert_pwd').value = ''
+    document.getElementById('cert_pwd1').value = ''
+    document.getElementById('cert_wait').hidden = false
+    document.getElementById('p12-cert').hidden = true
+    document.getElementById('pkcs12-download').removeAttribute('href');
+
+    $('#certModal').modal('hide')
+    $('#certReadyModal').modal('show')
+
+    setTimeout(function() {
+      certData = genCert(name, email, certOrg, certState, certCountry, webId, certPwd)
+
+      var p12Url = 'data:application/x-pkcs12;base64,' + certData.pkcs12B64;
+      document.getElementById('pkcs12-download').setAttribute('href', p12Url);
+      document.getElementById('p12-cert').hidden = false
+      document.getElementById('cert_wait').hidden = true
+      document.getElementById('upload_cert').disabled = false
+
+    }, 500);
+
+
+    return false
 
   }
+
+
+  function uploadCertificate() {
+    let formData  = new URLSearchParams();
+    formData.append('username', '{{username}}')
+    formData.append('certificatePEM', certData.pem)
+    formData.append('certificatePKCS12', certData.pkcs12B64)
+
+    fetch('/api/accounts/cert_new',
+      { method: 'POST', 
+        headers: {
+        'Accept': 'text/html, text/plain, *.*',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+        },
+        credentials: 'include', 
+        body: formData
+    })
+    .then(function(response) {
+        if (!response.ok) {
+          if (response.status==401) {
+            throw new Error('HTTP='+response.status+'  '+response.statusText+'. ReLogin to your account')
+          }
+          else {
+            throw new Error('HTTP='+response.status+'  '+response.statusText)
+          }
+        } else {
+          document.getElementById('cert-done').hidden = false
+          document.getElementById('p12-cert-note').hidden = true
+          document.getElementById('upload_cert').disabled = true
+/*          alert('Certificate was registred on server'); */
+        }
+    })
+    .catch(function(error) {
+      alert(error)
+    })
+
+  }
+
+ 
+ function genCert(certName, certEmail, certOrg, certState, certCountry, webId, pwd) {
+   let pki = forge.pki
+
+   // generate a keypair and create an X.509v3 certificate
+   let keys = pki.rsa.generateKeyPair(2048)
+   var cert = pki.createCertificate()
+   cert.publicKey = keys.publicKey
+   // NOTE: serialNumber is the hex encoded value of an ASN.1 INTEGER.
+   // Conforming CAs should ensure serialNumber is:
+   // - no more than 20 octets
+   // - non-negative (prefix a '00' if your value starts with a '1' bit)
+   cert.serialNumber = (Date.now()).toString(16)
+
+   cert.validity.notBefore = new Date()
+   cert.validity.notAfter = new Date()
+   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
+
+   let attrs = [];
+   if (certName && certName.length > 1) {
+     attrs.push({ name: 'commonName', value: certName })
+   }
+
+   if (certCountry && certCountry.length > 1) {
+      attrs.push({ name: 'countryName', value: certCountry })
+   }
+
+   if (certState && certState.length > 1) {
+      attrs.push({ shortName: 'ST', value: certState })
+   }
+   if (certOrg && certOrg.length > 1) {
+      attrs.push({ name: 'organizationName', value: certOrg })
+   } else {
+      attrs.push({ name: 'organizationName', value: 'WebID' })
+   }
+   if (certEmail && certEmail.length > 1) {
+      attrs.push({ name: 'emailAddress', value: certEmail})
+   }
+
+   cert.setSubject(attrs);
+   cert.setIssuer(attrs);
+   cert.setExtensions([
+     { name: 'basicConstraints',  cA: true,  critical: true}, 
+     { name: 'keyUsage',  digitalSignature: true }, 
+     { name: 'extKeyUsage', clientAuth: true}, 
+     { name: 'nsCertType', client: true}, 
+     { name: 'subjectAltName',
+         altNames: [{
+           type: 6, // URI
+           value: webId
+         }]
+     }, 
+     { name: 'subjectKeyIdentifier'}
+   ])
+
+   cert.sign(keys.privateKey, forge.md.sha512.create())
+
+   let pemCert = pki.certificateToPem(cert);
+
+   let p12Asn1 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, [cert], pwd,
+        {generateLocalKeyId: true, 
+         friendlyName: 'solid-cert',
+         algorithm: '3des'
+         })
+
+   let p12Der = forge.asn1.toDer(p12Asn1).getBytes()
+   let p12B64 = forge.util.encode64(p12Der)
+
+   return {pem: pemCert, pkcs12B64: p12B64}
+ }
 
 </script>
 </html>
