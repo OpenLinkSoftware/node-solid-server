@@ -40,6 +40,7 @@
         <span>
           This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
           <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
+          <button type="button" class="btn btn-primary" id="create-csr">Create CSR</button>
         </span>
       </p>
     </div>
@@ -105,7 +106,7 @@
 
 <!-- Modal -->
 <div class="modal fade" id="certModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:400px" role="document">
+  <div class="modal-dialog" style="width:500px" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -114,64 +115,136 @@
         <h4 class="modal-title">Create and register certificate</h4>
       </div>
       <div class="modal-body">
-        <div class="row">
-          <div class="col-md-12">
-            <label for="name">Name:</label>
-            <input type="text" class="form-control" id="name" value="{{name}}" />
-          </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <label for="email">Email:</label>
-            <input type="email" class="form-control" id="email" />
-          </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
+      
+        <div class="accordion" id="accordion-cert">
+          <div class="card">
+            <div class="card-header" id="headingOne">
+              <h5 class="mb-0">
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                  Create Self-Signed Certificate
+                </button>
+              </h5>
+            </div>
+        
+            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion-cert">
+              <div class="card-body">
+<!-- acc start --------------------------------------- -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_name">Name:</label>
+                    <input type="text" class="form-control" id="cert_name" value="{{name}}" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_email">Email:</label>
+                    <input type="email" class="form-control" id="cert_email" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_Org">Organization:</label>
+                    <input type="text" class="form-control" id="cert_Org" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_OrgUnit">Organizational Unit:</label>
+                    <input type="text" class="form-control" id="cert_OrgUnit" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_City">City (Locality):</label>
+                    <input type="text" class="form-control" id="cert_City" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_State">State:</label>
+                    <input type="text" class="form-control" id="cert_State" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <label for="cert_Country">Country:</label>
+                    <input type="text" class="form-control" id="cert_Country" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label id="lb_cert_pwd" for="cert_pwd">Password for PKCS12 certificate :</label>
+                    <input type="password" class="form-control" id="cert_pwd" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert_pwd1">Confirm Password:</label>
+                    <input type="password" class="form-control" id="cert_pwd1" />
+                  </div>
+                  <div class="col-md-12">&nbsp;</div>
+                </div>
 
-        <div class="row">
-          <div class="col-md-12">
-            <label for="cert_Org">Organization:</label>
-            <input type="text" class="form-control" id="cert_Org" />
+                </p>
+                <hr>
+                <div class="row pull-right">
+                  <div class="col-md-12">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    &nbsp;&nbsp;
+                    <button id="gen-cert-btn" type="button" class="btn btn-primary pull-right">Continue</button>
+                  </div>
+                </div>
+                </br>
+<!-- acc end --------------------------------------- -->
+              </div>
+            </div>
           </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <label for="cert_State">State:</label>
-            <input type="text" class="form-control" id="cert_State" />
-          </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
-        <div class="row">
-          <div class="col-md-4">
-            <label for="cert_Country">Country:</label>
-            <input type="text" class="form-control" id="cert_Country" />
-          </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
 
-        <div class="row">
-          <div class="col-md-12">
-            <label for="cert_pwd">Password for PKCS12 certificate :</label>
-            <input type="password" class="form-control" id="cert_pwd" />
+          <div class="card">
+            <div class="card-header" id="headingTwo">
+              <h5 class="mb-0">
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  Upload existed certificate
+                </button>
+              </h5>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion-cert">
+              <div class="card-body">
+<!-- acc start--------------------------------------- -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="cert-data">Certificate PEM data:</label>
+                    <textarea class="form-control" id="cert-data" rows="10" style="white-space: nowrap;  overflow: auto;"></textarea>
+                    </p>
+                    <input type="file" id="cert-file-load" title="Load Certificate pem file">
+                  </div>
+                </div>
+                </p>
+                <hr>
+                <div class="row pull-right">
+                  <div class="col-md-12">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    &nbsp;&nbsp;
+                    <button id="upload-existed-cert" type="button" class="btn btn-primary pull-right">Continue</button>
+                  </div>
+                </div>
+                </br>
+<!-- acc end--------------------------------------- -->
+              </div>
+            </div>
           </div>
-          <div class="col-md-12">&nbsp;</div>
         </div>
-        <div class="row">
-          <div class="col-md-12">
-            <label for="cert_pwd1">Confirm Password:</label>
-            <input type="password" class="form-control" id="cert_pwd1" />
-          </div>
-          <div class="col-md-12">&nbsp;</div>
-        </div>
-
-        </p>
+        
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button id="gen_cert" type="button" class="btn btn-primary">Continue</button>
-      </div>
+      </br>
     </div>
   </div>
 </div>
@@ -195,14 +268,9 @@
            <h5>PKCS12 Certificate</h5>
            <a id="pkcs12-download" download="certificate.p12">Download PKCS12</a>
            <br/>
-           <h5 id="p12-cert-note" >Please save certificate on local disk and click Register.</h5>
+           <h >Please save certificate on local disk and click Register.</h5>
         </section>
         </p>
-        <section id="cert-done">
-           <h5><b>The following actions have been applied re. WebID-TLS protocol usage:</b></h5>
-           <h5>1. WebID-Profile Relations Update re. Public Key (modulus and exponent)</h5>
-           <h5>2. PKCS#12 identity card saved to ~profile folder</h5>
-        </section>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -213,10 +281,137 @@
 </div>
 
 
+<!-- Modal -->
+<div class="modal fade" id="csrModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:500px" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Create a Certificate Request for a Certificate Authority</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_name">Name:</label>
+            <input type="text" class="form-control" id="csr_name" value="smalinin1" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_email">Email:</label>
+            <input type="email" class="form-control" id="csr_email" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_Org">Organization:</label>
+            <input type="text" class="form-control" id="csr_Org" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_OrgUnit">Organizational Unit:</label>
+            <input type="text" class="form-control" id="csr_OrgUnit" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_City">City (Locality):</label>
+            <input type="text" class="form-control" id="csr_City" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_State">State:</label>
+            <input type="text" class="form-control" id="csr_State" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label for="csr_Country">Country:</label>
+            <input type="text" class="form-control" id="csr_Country" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_pwd">Password for Private Key :</label>
+            <input type="password" class="form-control" id="csr_pwd" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label for="csr_pwd1">Confirm Password:</label>
+            <input type="password" class="form-control" id="csr_pwd1" />
+          </div>
+          <div class="col-md-12">&nbsp;</div>
+        </div>
+
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id="gen-csr-btn" type="button" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="csrReadyModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:600px" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Certificate Request & PrivateKey</h4>
+      </div>
+      <div class="modal-body">
+        <div id="csr_wait">
+         <img src="common/css/throbber.gif" width="16" /> Wait...
+        </div>
+        <section id="csr">
+          <h5>Certificate Request in PEM Format</h5>
+            <a id="csr-download" download="csr.pem">Download Certificate Request</a>
+            <pre id="csr-text"></pre>
+        </section>
+        <br/>
+        </p>
+        <section id="csr">
+          <h5>Certificate Private Key in PEM Format</h5>
+          <a id="pkey-download" download="privateKey.pem">Download Private Key</a>
+        </section>
+        </p>
+        <h >Please save certificate request and private key on local disk.</h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 <script src="/common/js/solid-auth-client.bundle.js"></script>
 <script type="text/javascript">
-  let certData = {};
+  let certData = {}
+  let certDays = 60
+  const webId = '{{webId}}'
   const popupUri = window.location.origin + '/common/popup.html'
   const stateData = {
     session: null
@@ -240,6 +435,8 @@
       .then(saveSession)
       .then(render)
 
+    getCertDays()
+
     // Add event listeners
     const actionButton = sessionActionButton()
     actionButton.addEventListener('click', takeSessionAction)
@@ -250,10 +447,30 @@
 
     const btnShowGenCert = document.getElementById('update_cert')
     btnShowGenCert.addEventListener('click', showGenCertificate)
-    const btnGenCert = document.getElementById('gen_cert')
-    btnGenCert.addEventListener('click', genCertificate)
     const btnUploadCert = document.getElementById('upload_cert')
     btnUploadCert.addEventListener('click', uploadCertificate)
+    const btnShowGenCSR = document.getElementById('create-csr')
+    btnShowGenCSR.addEventListener('click', showGenCSR)
+
+    const btnLoadPemFile = document.getElementById('cert-file-load')
+    btnLoadPemFile.addEventListener('change', handleLoadPemFile)
+    
+    const btnUploadExistedCert = document.getElementById('upload-existed-cert')
+    btnUploadExistedCert.addEventListener('click', uploadExistedCertificate)
+
+
+    $('#collapseOne').on('show.bs.collapse', function () {
+      $('#collapseTwo').collapse('hide')
+    })
+    $('#collapseTwo').on('show.bs.collapse', function () {
+      $('#collapseOne').collapse('hide')
+    })
+
+    const btnGenCert = document.getElementById('gen-cert-btn')
+    btnGenCert.addEventListener('click', genCertificate)
+
+    const btnGenCsr = document.getElementById('gen-csr-btn')
+    btnGenCsr.addEventListener('click', genCSRequest)
   }
 
   function saveSession(session) {
@@ -351,18 +568,87 @@
     document.getElementById('cert_pwd').value = ''
     document.getElementById('cert_pwd1').value = ''
     document.getElementById('upload_cert').disabled = true
-    document.getElementById('cert-done').hidden = true
+    document.getElementById('cert-data').value = ''
+    document.getElementById('cert-file-load').value = ''
+
     $('#certModal').modal('show')
   }
 
 
+  function showGenCSR() {
+
+    document.getElementById('csr_pwd').hidden = true
+    document.getElementById('csr_pwd1').hidden = true
+
+    $('#csrModal').modal('show')
+  }
+
+
+  function genCSRequest() {
+    certData = {};
+
+    let name = document.getElementById('csr_name').value;
+    let email = document.getElementById('csr_email').value;
+    let certOrg = document.getElementById('csr_Org').value;
+    let certOrgUnit = document.getElementById('csr_OrgUnit').value;
+    let certCity = document.getElementById('csr_City').value;
+    let certState = document.getElementById('csr_State').value;
+    let certCountry = document.getElementById('csr_Country').value;
+    let certPwd = document.getElementById('csr_pwd').value;
+    let certPwd1 = document.getElementById('csr_pwd1').value;
+
+    if (certCountry.length > 0 && certCountry.length!=2) {
+      alert('Country must be two characters')
+      return
+    }
+    if (name.length < 1) {
+      alert('Name is empty')
+      return
+    }
+
+    if (certPwd != certPwd1)  {
+      alert('Confirm Private Key password with properly value')
+      return
+    }
+
+
+    document.getElementById('csr-download').removeAttribute('href')
+    document.getElementById('pkey-download').removeAttribute('href')
+    document.getElementById('csr-text').textContent = ''
+    document.getElementById('csr_wait').hidden = false
+
+    $('#csrModal').modal('hide')
+    $('#csrReadyModal').modal('show')
+
+    setTimeout(function() {
+
+      certData = genCSR(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd)
+
+      document.getElementById('csr-text').textContent = certData.pem
+
+      var csrUrl = "data:application/octet-stream;charset=UTF-8;base64," + btoa(certData.pem);
+      document.getElementById("csr-download").setAttribute("href", csrUrl);
+      var pkeyUrl = "data:application/octet-stream;charset=UTF-8;base64," + btoa(certData.pkey);
+      document.getElementById("pkey-download").setAttribute("href", pkeyUrl);
+      document.getElementById('csr_wait').hidden = true
+
+
+    }, 500);
+
+
+    return false
+
+  }
+
+  
   function genCertificate() {
     certData = {};
 
-    let webId = '{{webId}}'
-    let name = document.getElementById('name').value;
-    let email = document.getElementById('email').value;
+    let name = document.getElementById('cert_name').value;
+    let email = document.getElementById('cert_email').value;
     let certOrg = document.getElementById('cert_Org').value;
+    let certOrgUnit = document.getElementById('cert_OrgUnit').value;
+    let certCity = document.getElementById('cert_City').value;
     let certState = document.getElementById('cert_State').value;
     let certCountry = document.getElementById('cert_Country').value;
     let certPwd = document.getElementById('cert_pwd').value;
@@ -396,7 +682,7 @@
     $('#certReadyModal').modal('show')
 
     setTimeout(function() {
-      certData = genCert(name, email, certOrg, certState, certCountry, webId, certPwd)
+      certData = genCert(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd)
 
       var p12Url = 'data:application/x-pkcs12;base64,' + certData.pkcs12B64;
       document.getElementById('pkcs12-download').setAttribute('href', p12Url);
@@ -409,6 +695,51 @@
 
     return false
 
+  }
+
+
+  function uploadExistedCertificate() {
+    let pki = forge.pki
+    certData = {}
+    let cert
+    let pemData = document.getElementById('cert-data').value
+
+    if (pemData.length < 1) {
+      alert('Empty certificate')
+      return
+    }
+
+    certData.pem = pemData
+
+    try {
+      cert = pki.certificateFromPem(pemData);
+      if (!cert)
+        throw new Error('Could not parse Certificate PEM data')
+
+      let ext_webId
+      let ext = cert.getExtension('subjectAltName')
+      if (ext !== null && ext.altNames) {
+        for(var i = 0; i < ext.altNames.length; ++i) {
+          let altName = ext.altNames[i];
+          if(altName.type === 6) {
+            ext_webId = altName.value;
+            break;
+          }
+        }
+      }
+      if (!ext_webId) {
+        throw new Error('Could not found WebId in Certificate')
+      }
+      if (ext_webId!==webId) {
+        throw new Error(`Found a wrong WebID=${webId} in Certificate `)
+      }
+
+    } catch(e) {
+      alert(e)
+      return
+    }
+
+    uploadCertificate()
   }
 
 
@@ -436,20 +767,35 @@
             throw new Error('HTTP='+response.status+'  '+response.statusText)
           }
         } else {
-          document.getElementById('cert-done').hidden = false
-          document.getElementById('p12-cert-note').hidden = true
           document.getElementById('upload_cert').disabled = true
-/*          alert('Certificate was registred on server'); */
+          let s = 'Certificate was registred on server \n'+
+             ' The following actions have been applied re. WebID-TLS protocol usage:\n'+
+             '- WebID-Profile Relations Update re. Public Key (modulus and exponent)\n';
+          if (certData.pkcs12B64 && certData.pkcs12B64.length > 1) {
+              s += '- PKCS#12 identity card saved to ~profile folder\n';
+          }
+
+          $('#certReadyModal').modal('hide')
+          $('#certModal').modal('hide')
+          alert(s)
         }
     })
     .catch(function(error) {
+      $('#certReadyModal').modal('hide')
+      $('#certModal').modal('hide')
       alert(error)
     })
 
   }
 
  
- function genCert(certName, certEmail, certOrg, certState, certCountry, webId, pwd) {
+  function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+ function genCert(certName, certEmail, certOrg, certOrgUnit, certCity, certState, certCountry, webId, pwd) {
    let pki = forge.pki
 
    // generate a keypair and create an X.509v3 certificate
@@ -463,8 +809,8 @@
    cert.serialNumber = (Date.now()).toString(16)
 
    cert.validity.notBefore = new Date()
-   cert.validity.notAfter = new Date()
-   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
+   cert.validity.notAfter = addDays(new Date(), 60)
+//   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
 
    let attrs = [];
    if (certName && certName.length > 1) {
@@ -478,6 +824,13 @@
    if (certState && certState.length > 1) {
       attrs.push({ shortName: 'ST', value: certState })
    }
+   if (certCity && certCity.length > 1) {
+      attrs.push({ name: 'localityName', value: certCity })
+   }
+   if (certOrgUnit && certOrgUnit.length > 1) {
+      attrs.push({ name: 'organizationalUnitName', value: certOrgUnit })
+   }
+
    if (certOrg && certOrg.length > 1) {
       attrs.push({ name: 'organizationName', value: certOrg })
    } else {
@@ -517,6 +870,126 @@
    let p12B64 = forge.util.encode64(p12Der)
 
    return {pem: pemCert, pkcs12B64: p12B64}
+ }
+
+
+ function genCSR(certName, certEmail, certOrg, certOrgUnit, certCity, certState, certCountry, webId, pwd) {
+   let pki = forge.pki
+
+   // generate a keypair and create an X.509v3 certificate
+   let keys = pki.rsa.generateKeyPair(2048)
+
+   let csr = pki.createCertificationRequest()
+   csr.publicKey = keys.publicKey
+
+   let attrs = [];
+   if (certName && certName.length > 1) {
+     attrs.push({ name: 'commonName', value: certName })
+   }
+
+   if (certCountry && certCountry.length > 1) {
+      attrs.push({ name: 'countryName', value: certCountry })
+   }
+
+   if (certState && certState.length > 1) {
+      attrs.push({ shortName: 'ST', value: certState })
+   }
+
+   if (certCity && certCity.length > 1) {
+      attrs.push({ name: 'localityName', value: certCity })
+   }
+   if (certOrgUnit && certOrgUnit.length > 1) {
+      attrs.push({ name: 'organizationalUnitName', value: certOrgUnit })
+   }
+
+   if (certOrg && certOrg.length > 1) {
+      attrs.push({ name: 'organizationName', value: certOrg })
+   } else {
+      attrs.push({ name: 'organizationName', value: 'WebID' })
+   }
+   if (certEmail && certEmail.length > 1) {
+      attrs.push({ name: 'emailAddress', value: certEmail})
+   }
+
+   csr.setSubject(attrs);
+
+// set (optional) attributes
+   csr.setAttributes([
+//     { name: 'challengePassword',  value: 'password'}, 
+//     { name: 'unstructuredName',  value: 'My Company, Inc.'}, 
+     
+     { name: 'extensionRequest',
+        extensions: [
+         { name: 'subjectAltName',  
+            altNames: [{
+             type: 6,
+             value: webId
+            }]
+         },
+         { name: 'keyUsage',  digitalSignature: true },
+         { name: 'extKeyUsage', clientAuth: true}
+         ]
+     }
+   ])
+
+   csr.sign(keys.privateKey, forge.md.sha512.create())
+
+   let pemCSR = pki.certificationRequestToPem(csr);
+   let pemKey
+
+   if (pwd.length > 0) {
+     let ekey = pki.encryptPrivateKeyInfo(pki.privateKeyToAsn1(keys.privateKey), 
+                                   pwd,
+                                   { algorithm: '3des',
+                                     prfAlgorithm: 'sha512'
+                                   })
+     pemPKey = pki.encryptedPrivateKeyToPem(ekey);
+   } else {
+     pemPKey = pki.privateKeyToPem(keys.privateKey)
+   }
+
+   return {pem: pemCSR, pkey: pemPKey}
+ }
+
+
+ function handleLoadPemFile(evt) {
+   var tempReader = new FileReader();
+
+   var currentFiles = evt.target.files;
+
+   // noinspection AnonymousFunctionJS
+   tempReader.onload = function (event) {
+	// noinspection JSUnresolvedVariable
+	let certBuffer = event.target.result;
+	let fld = document.getElementById('cert-data')
+	fld.value = ab2str(certBuffer)
+   };
+
+   tempReader.readAsArrayBuffer(currentFiles[0]);
+ }
+
+ function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+ }
+
+ function getCertDays() {
+   fetch('/certdays',
+        { method: 'GET', 
+          headers: {
+            'Accept': 'text/plain; charset=utf-8'
+          },
+          credentials: 'include'
+        })
+      .then(function(response) {
+        if (response.ok) {
+          response.text().then((s)=> {
+            let days = parseInt(s, 10)
+            if (days > 0) {
+              certDays = days
+            }
+          })
+        }
+      })
  }
 
 </script>

@@ -11,5 +11,7 @@ module.exports = {
   'port': 8443,
   'serverUri': 'https://localhost:8443',
   'webid': true,
-  'dataBrowserPath': 'default'
+  'dataBrowserPath': 'default',
+//  'dataBrowserPath': 'https://linkeddata.uriburner.com/describe/?url={url}&sponger:get=add'
+  'certDays': 60
 }
