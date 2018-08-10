@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Register</title>
   <link rel="stylesheet" href="/common/css/bootstrap.min.css">
-
-  <script src="/common/js/jquery.min.js"></script>
-  <script src="/common/js/bootstrap.min.js"></script>
-  <script src="/common/js/forge.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -18,23 +14,8 @@
   {{#if registerDisabled}}
     {{> account/register-disabled}}
   {{else}}
-    {{#if authTls}}
-      {{> account/register-form-tls}}
-    {{else}}
-      {{> account/register-form}}
-    {{/if}}
- 
-    {{> account/register-script}}
-
+    {{> account/register-form}}
   {{/if}}
-</div>
-<div class="container">
-  <div class="row">
-    <div class="col-md-4">
-      <br/>
-      Ver: {{solidVersion}}
-    </div>
-  </div>
 </div>
 </body>
 </html>

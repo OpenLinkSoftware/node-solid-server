@@ -6,9 +6,6 @@
 
     acl:agent
         <{{webId}}>;
-{{#if addOwlSameAs}}
-    acl:agent  <{{extWebId}}>;
-{{/if}}
 
     # Set the access to the root storage folder itself
     acl:accessTo <./>;
