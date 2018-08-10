@@ -11,7 +11,15 @@ module.exports = {
   'port': 8443,
   'serverUri': 'https://localhost:8443',
   'webid': true,
-  'dataBrowserPath': 'default',
+  'certDays': 60,
+  'dataBrowserPath': 'default'
 //  'dataBrowserPath': 'https://linkeddata.uriburner.com/describe/?url={url}&sponger:get=add'
-  'certDays': 60
+
+  // For use in Enterprises to configure a HTTP proxy for all outbound HTTP requests from the SOLID server (we use
+  // https://www.npmjs.com/package/global-tunnel-ng).
+  // "httpProxy": {
+  //   "tunnel": "neither",
+  //   "host": "proxy.example.com",
+  //   "port": 12345
+  // }
 }
