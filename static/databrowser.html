@@ -1,34 +1,38 @@
 <!DOCTYPE html>
 <html id="docHTML">
 <head>
-    <link type="text/css" rel="stylesheet" href="https://solid.github.io/solid-panes/style/tabbedtab.css" />
+    <link type="text/css" rel="stylesheet" href="/common/css/tabbedtab.css" />
     <script>
       var $SOLID_GLOBAL_config = {
         popupUri: window.location.origin + '/common/popup.html'
       }
     </script>
-    <script type="text/javascript" src="https://linkeddata.github.io/mashlib/dist/mashlib.min.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const panes = require('mashlib')
-        const UI = panes.UI
+<!-- <script type="text/javascript" src="https://linkeddata.github.io/mashlib/dist/mashlib.min.js"></script> -->
+<script type="text/javascript" src="/common/js/mashlib.min.js"></script>
+<script>
 
-        // Set up cross-site proxy
-        const $rdf = UI.rdf
-        $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/xss/?uri={uri}'
+  document.addEventListener('DOMContentLoaded', function() {
 
-        // Authenticate the user
-        UI.authn.checkUser()
-          .then(function () {
-            // Set up the view for the current subject
-            const kb = UI.store
-            const uri = window.location.href
-            const subject = kb.sym(uri)
-            const outliner = panes.getOutliner(document)
-            outliner.GotoSubject(subject, true, undefined, true, undefined)
-          })
+    const panes  = require('mashlib')
+    const UI = panes.UI
+    const $rdf = UI.rdf
+
+    $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/proxy?uri={uri}';
+    var uri = window.location.href;
+
+    window.document.title = 'Loading ' + uri
+
+    UI.authn.checkUser()
+      .then(function () {
+        // Set up the view for the current subject
+        const kb = UI.store
+        const subject = kb.sym(uri)
+        const outliner = panes.getOutliner(document)
+        outliner.GotoSubject(subject, true, undefined, true, undefined)
       })
-    </script>
+
+  })
+</script>
 </head>
 <body>
 <div class="TabulatorOutline" id="DummyUUID">
