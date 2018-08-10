@@ -1,4 +1,4 @@
-# ACL for the default favicon.ico resource
+# ACL for the default .well-known/ resource
 # Server operators will be able to override it as they wish
 # Public-readable
 
@@ -10,6 +10,6 @@
 
     acl:agentClass foaf:Agent;  # everyone
 
-    acl:accessTo </favicon.ico>;
+    acl:accessTo </.well-known/>;
 
     acl:mode acl:Read.
