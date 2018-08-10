@@ -17,6 +17,10 @@
     const UI = panes.UI
     const $rdf = UI.rdf
 
+    // UI.config = { idpSelectUri:  'https://timbl.com/timbl/Automation/Library/Mashup/idp-select-ui.html',
+    //               callbackUri:  'https://timbl.com/timbl/Automation/Library/Mashup/idp-callback.html'
+    //  }
+
     $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/proxy?uri={uri}';
     var uri = window.location.href;
 
