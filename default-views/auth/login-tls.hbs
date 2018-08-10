@@ -25,32 +25,6 @@
 <script type="text/javascript">
   const button = document.getElementById('login-tls')
   button.addEventListener('click', function(event) {
-  /****//?? checkme MASTER
-    event.preventDefault()
-    fetch('/login/tls', { method: 'POST', credentials: 'include' })
-      .then(function(response) {
-        const webId = response.headers.get('user')
-        const idp = new URL(webId).origin
-        const session = { authType: 'WebID-TLS', webId, idp }
-        const authClientNamespace = 'solid-auth-client'
-        let authClientStore
-        try {
-          authClientStore = JSON.parse(localStorage.getItem(authClientNamespace) || '{}')
-        } catch (err) {
-          authClientStore = {}
-        }
-        authClientStore.session = session
-        localStorage.setItem(authClientNamespace, JSON.stringify(authClientStore))
-        return response
-      })
-      .then(function(response) {
-        // Temporary solution to restore return URL
-        // until https://github.com/solid/oidc-auth-manager/issues/17 is resolved
-        const returnToUrl = localStorage.getItem('returnToUrl')
-        localStorage.removeItem('returnToUrl')
-        window.location.href = returnToUrl || '/'
-      })
-  ***/ 
     const clientId = document.querySelector('#tls #client_id')
     const scope = document.querySelector('#tls #scope')
     const request = document.querySelector('#tls #request')
