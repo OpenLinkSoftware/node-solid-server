@@ -4704,11 +4704,8 @@ var currentSession = exports.currentSession = function () {
 var logout = exports.logout = function logout(storage, idp) {
   return getStoredRp(storage).then(function (rp) {
     return rp ? rp.logout() : undefined;
-  }).catch(function (err) {
-    console.warn('Error logging out of the WebID-OIDC session');
-    console.error(err);
   }).then(function (x) {
-    fetch(idp + '/logout', { method: 'GET', credentials: 'include' });
+    fetch(idp + '/logout', { method: 'POST', credentials: 'include' });
   }).catch(function (err) {
     console.warn('Error logging out of the WebID-OIDC session');
     console.error(err);
@@ -6550,49 +6547,36 @@ var logout = exports.logout = function () {
           case 2:
             session = _context5.sent;
 
-            if (session) {
-              _context5.next = 5;
+            if (!session) {
+              _context5.next = 15;
               break;
             }
 
-            return _context5.abrupt('return');
-
-          case 5:
-            _context5.t0 = session.authType;
-            _context5.next = _context5.t0 === 'WebID-OIDC' ? 8 : _context5.t0 === 'WebID-TLS' ? 18 : 18;
-            break;
-
-          case 8:
-            _context5.prev = 8;
-            _context5.next = 11;
+            _context5.prev = 4;
+            _context5.next = 7;
             return WebIdOidc.logout(storage, session.idp);
 
-          case 11:
-            _context5.next = 17;
+          case 7:
+            _context5.next = 13;
             break;
 
-          case 13:
-            _context5.prev = 13;
-            _context5.t1 = _context5['catch'](8);
+          case 9:
+            _context5.prev = 9;
+            _context5.t0 = _context5['catch'](4);
 
             console.warn('Error logging out:');
-            console.error(_context5.t1);
+            console.error(_context5.t0);
 
-          case 17:
-            return _context5.abrupt('break', 19);
+          case 13:
+            _context5.next = 15;
+            return (0, _session.clearSession)(storage);
 
-          case 18:
-            return _context5.abrupt('break', 19);
-
-          case 19:
-            return _context5.abrupt('return', (0, _session.clearSession)(storage));
-
-          case 20:
+          case 15:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[8, 13]]);
+    }, _callee5, this, [[4, 9]]);
   }));
 
   return function logout() {
@@ -11175,8 +11159,7 @@ var idps = [
   displayName: 'Local OIDC',
   url: 'https://localhost:8444/',
   iconUrl: 'https://solidtest.space/favicon.ico'
-}
-];
+}];
 
 findAppOrigin().then(function (appOrigin) {
   var appName = 'Databrowser';
