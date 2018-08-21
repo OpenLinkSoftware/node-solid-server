@@ -96,7 +96,7 @@ describe('AddCertificateRequest', () => {
 
       return certificate.generateCertificate()
         .then(() => {
-          return accountManager.addCertKeyToGraph(certificate, graph)
+          return accountManager.addCertKeyToGraph(certificate, graph, userAccount)
         })
         .then(graph => {
           let webId = rdf.namedNode(certificate.webId)
