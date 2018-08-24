@@ -1,0 +1,11 @@
+{
+    "owners": ["{{accountUri}}"],
+    "title": "Plume",
+    "tagline": "Light as a feather",
+    "picture": "/common/plume/img/logo.svg",
+    "fadeText": true,
+    "showSources": true,
+    "cacheUnit": "days",
+    "defaultPath": "posts",
+    "postsURL": "{{accountUri}}/public/blog/posts/"
+}
