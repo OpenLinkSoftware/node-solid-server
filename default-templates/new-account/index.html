@@ -41,7 +41,7 @@
           This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
           <div id="update_profile">
             <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
-            <button type="button" class="btn btn-primary" id="create-csr">Create CSR</button>
+            <button type="button" class="btn btn-primary" id="create-csr">Create Cert. Signature Request</button>
           </div>
         </span>
       </p>
@@ -123,7 +123,6 @@
         
             <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion-cert">
               <div class="card-body">
-<!-- acc start --------------------------------------- -->
                 <div class="row">
                   <div class="col-md-12">
                     <label for="cert_name">Name:</label>
@@ -175,7 +174,7 @@
                 </div>
                 <div class="row">
                   <div class="col-md-12">
-                    <label id="lb_cert_pwd" for="cert_pwd">Password for PKCS12 certificate :</label>
+                    <label id="lb_cert_pwd" for="cert_pwd">Password for PKCS12 Credentials Store:</label>
                     <input type="password" class="form-control" id="cert_pwd" />
                   </div>
                   <div class="col-md-12">&nbsp;</div>
@@ -198,8 +197,7 @@
                   </div>
                 </div>
                 </br>
-<!-- acc end --------------------------------------- -->
-              </div>
+             </div>
             </div>
           </div>
 
@@ -213,7 +211,6 @@
             </div>
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion-cert">
               <div class="card-body">
-<!-- acc start--------------------------------------- -->
                 <div class="row">
                   <div class="col-md-12">
                     <label for="cert-data">Certificate PEM data:</label>
@@ -232,7 +229,6 @@
                   </div>
                 </div>
                 </br>
-<!-- acc end--------------------------------------- -->
               </div>
             </div>
           </div>
@@ -260,10 +256,10 @@
          <img src="common/css/throbber.gif" width="16" /> Wait...
         </div>
         <section id="p12-cert">
-           <h5>PKCS12 Certificate</h5>
+           <h5>PKCS12 Credentials Store</h5>
            <a id="pkcs12-download" download="certificate.p12">Download PKCS12</a>
            <br/>
-           <h >Please save certificate on local disk and click Register.</h5>
+           <h >Please save PKCS12 Credentials Store on local disk and click Register.</h5>
         </section>
         </p>
       </div>
