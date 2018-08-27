@@ -3454,11 +3454,9 @@ var currentSession = exports.currentSession = function () {
   };
 }();
 
-var logout = exports.logout = function logout(storage, idp) {
+var logout = exports.logout = function logout(storage) {
   return getStoredRp(storage).then(function (rp) {
     return rp ? rp.logout() : undefined;
-  }).then(function (x) {
-    fetch(idp + '/logout', { method: 'POST', credentials: 'include' });
   }).catch(function (err) {
     console.warn('Error logging out of the WebID-OIDC session');
     console.error(err);
@@ -5559,6 +5557,8 @@ var RelyingParty = function (_JSONDocument) {
   }, {
     key: 'logout',
     value: function logout() {
+      var _this5 = this;
+
       var configuration = void 0;
       try {
         assert(this.provider, 'OpenID Configuration is not initialized.');
@@ -5569,9 +5569,17 @@ var RelyingParty = function (_JSONDocument) {
         return _promise2.default.reject(error);
       }
 
-      this.clearSession();
+      if (!configuration.end_session_endpoint) {
+        this.clearSession();
+        return _promise2.default.resolve(undefined);
+      }
 
-      return _promise2.default.resolve(configuration.end_session_endpoint);
+      var uri = configuration.end_session_endpoint;
+      var method = 'get';
+
+      return fetch(uri, { method: method, credentials: 'include' }).then(onHttpError('Error logging out')).then(function () {
+        return _this5.clearSession();
+      });
 
       // TODO: Validate `frontchannel_logout_uri` if necessary
       /**
@@ -9490,36 +9498,49 @@ var logout = exports.logout = function () {
           case 2:
             session = _context5.sent;
 
-            if (!session) {
-              _context5.next = 15;
+            if (session) {
+              _context5.next = 5;
               break;
             }
 
-            _context5.prev = 4;
-            _context5.next = 7;
-            return WebIdOidc.logout(storage, session.idp);
+            return _context5.abrupt('return');
 
-          case 7:
-            _context5.next = 13;
+          case 5:
+            _context5.t0 = session.authType;
+            _context5.next = _context5.t0 === 'WebID-OIDC' ? 8 : _context5.t0 === 'WebID-TLS' ? 18 : 18;
             break;
 
-          case 9:
-            _context5.prev = 9;
-            _context5.t0 = _context5['catch'](4);
+          case 8:
+            _context5.prev = 8;
+            _context5.next = 11;
+            return WebIdOidc.logout(storage);
 
-            console.warn('Error logging out:');
-            console.error(_context5.t0);
+          case 11:
+            _context5.next = 17;
+            break;
 
           case 13:
-            _context5.next = 15;
-            return (0, _session.clearSession)(storage);
+            _context5.prev = 13;
+            _context5.t1 = _context5['catch'](8);
 
-          case 15:
+            console.warn('Error logging out:');
+            console.error(_context5.t1);
+
+          case 17:
+            return _context5.abrupt('break', 19);
+
+          case 18:
+            return _context5.abrupt('break', 19);
+
+          case 19:
+            return _context5.abrupt('return', (0, _session.clearSession)(storage));
+
+          case 20:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[4, 9]]);
+    }, _callee5, this, [[8, 13]]);
   }));
 
   return function logout() {
