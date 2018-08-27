@@ -16,7 +16,7 @@
 - [x] [Real-time live updates](https://github.com/solid/solid-spec#subscribing) (using WebSockets)
 - [x] Identity provider for WebID
 - [x] CORS proxy for cross-site data access
-- [ ] Group members in ACL
+- [x] Group members in ACL
 - [x] Email account recovery
 
 ## Command Line Usage
@@ -170,7 +170,6 @@ $ solid start --help
     --config-path [value]
     --db-path [value]
     --auth [value]                Pick an authentication strategy for WebID: `tls` or `oidc`
-    --certificate-header [value]
     --owner [value]               Set the owner of the storage (overwrites the root ACL file)
     --ssl-key [value]             Path to the SSL private key in PEM format
     --ssl-cert [value]            Path to the SSL certificate key in PEM format
@@ -364,7 +363,7 @@ npm run test-(acl|formats|params|patch)
 
 ## Contributing
 
-`solid` is only possible due to the excellent work of the following contributors:
+`solid` is has been made possible due to contributions from many individuals, these are some of the key contributors:
 
 <table>
   <tbody>
@@ -403,6 +402,12 @@ npm run test-(acl|formats|params|patch)
       <td><a href="https://github.com/RubenVerborgh/">GitHub/RubenVerborgh</a></td>
       <td><a href="https://twitter.com/RubenVerborgh">Twitter/@RubenVerborgh</a></td>
       <td><a href="https://ruben.verborgh.org/profile/#me">WebID</a></td>
+    </tr>
+    <tr>
+      <th align="left">Kjetil Kjernsmo</th>
+      <td><a href="https://github.com/kjetilk">GitHub/kjetilk</a></td>
+      <td><a href="https://twitter.com/KKjernsmo">Twitter/@KKjernsmo</a></td>
+      <td><a href="https://solid.kjernsmo.net/profile/card#me">WebID</a></td>
     </tr>
   </tbody>
 </table>
