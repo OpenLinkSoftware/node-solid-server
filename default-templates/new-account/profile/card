@@ -11,10 +11,10 @@
 
 <>
     a foaf:PersonalProfileDocument ;
-    foaf:maker :me ;
-    foaf:primaryTopic :me .
+    foaf:maker <{{webId}}> ;
+    foaf:primaryTopic <{{webId}}> .
 
-:me
+<{{webId}}>
     a foaf:Person ;
     a schema:Person ;
 
@@ -32,12 +32,12 @@
     solid:privateTypeIndex </settings/privateTypeIndex.ttl> .
 
 {{#if addOwlSameAs}}
-:me
+<{{webId}}>
     owl:sameAs <{{extWebId}}> .
 {{/if}}
 
 {{#if tlsCertWebid}}
-:me
+<{{webId}}>
     acl:delegates <{{tlsCertWebid}}> ; # Delegation Relations for Software Agent 
     cert:key :key-stub .
 

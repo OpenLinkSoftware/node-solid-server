@@ -9,6 +9,18 @@
   <script src="/common/js/jquery.min.js"></script>
   <script src="/common/js/bootstrap.min.js"></script>
   <script src="/common/js/forge.min.js"></script>
+
+  <script>
+    function showPasswd() {
+      var x = document.getElementById("password");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  </script>
+  
 </head>
 <body>
 <div class="container">

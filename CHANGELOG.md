@@ -1,5 +1,15 @@
 # History
 
+## 4.1.0
+
+- Add support for Group Access Control Lists.
+- Fix `Vary` header.
+- Improve the registration page.
+- Fix globbing.
+- Fix the use of allow handler.
+- Misc. cleanups and improvements.
+- Add .well-known folder and set up with public access.
+
 ## 4.0.0
 - OIDC is now supported as authentication method in addition to WebID-TLS.
 - Both Node.js 6 and 8 are now supported.
