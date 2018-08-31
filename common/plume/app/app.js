@@ -5,19 +5,18 @@ var Plume = Plume || {};
 Plume = (function () {
     'use strict';
 
-    const popupUri = window.location.origin + '/common/popup.html'
+    const popupUri = window.origin + '/common/popup.html'
 
-    const Solid = SolidClient;
-    const $rdf = SolidClient.rdflib;
     var config = Plume.config || {};
     var appURL = window.location.origin+window.location.pathname;
 
     // RDF
-    var PROXY = document.origin + '/proxy?uri={uri}';
+    var PROXY = window.origin + '/proxy?uri={uri}';
     var TIMEOUT = 5000;
 
     Solid.config.proxyUrl = PROXY;
-    Solid.web.config.proxyUrl = PROXY;
+    Solid.config.timeout = TIMEOUT;
+    Solid.fetch = solid.auth.fetch;
     $rdf.Fetcher.crossSiteProxyTemplate = PROXY;
     // common vocabs
     var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -33,7 +32,6 @@ Plume = (function () {
     var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 
 
-//-----------------------    
   function render(session) {
     const loggedHref = document.getElementById('logged-href')
     if (session && session.webId) {
@@ -47,7 +45,6 @@ Plume = (function () {
     }
   }
     
-//-----------------------    
     
     
     // init markdown editor
@@ -108,9 +105,8 @@ Plume = (function () {
         // set config params
         applyConfig(configData);
 
-//????-----------------
     // Render the session state
-    SolidAuthClient
+    solid.auth
       .currentSession()
       .then((session) => {
          if (session) {
@@ -119,7 +115,7 @@ Plume = (function () {
          return session
       })
       .then((session) => {render(session)})
-//????-----------------
+
 
         // try to load authors
         loadLocalAuthors();
@@ -266,13 +262,18 @@ Plume = (function () {
     // Log user in
     var login = function() {
         // Get the current user
-      SolidAuthClient
+      solid.auth
         .popupLogin({ popupUri })
         .then((session) => {
            if (session) {
              gotWebID(session.webId, true)
            }
-        })
+        }).catch((err) => {
+            console.log("Err", err);
+            notify('error', "Authentication failed");
+            showError(err);
+        });
+
     };
     // Signup for a WebID and space
     var signup = function() {
@@ -289,7 +290,7 @@ Plume = (function () {
         user = defaultUser;
         clearLocalStorage();
         showLogin();
-        SolidAuthClient
+        solid.auth
           .logout()
           .then(() => {
             window.location.reload();
@@ -305,22 +306,7 @@ Plume = (function () {
         hideLogin();
 
         // fetch and set user profile
-        Solid.getProfile(webid).then(function(profile) {
-          user.name = profile.name;
-          user.picture = profile.picture;
-          user.date = Date.now();
-          // add self to authors list
-          authors[webid] = user;
-          saveLocalAuthors();
-          // add workspaces
-          user.workspaces = profile.storage;
-          saveLocalStorage();
-          if (reload) {
-            window.location.reload();
-          }
-        })
-        .catch((err) => {
-          getProfile(webid).then(function(g) {
+        Solid.identity.getProfile(webid).then((g) => {
             var profile = getUserProfile(webid, g);
             user.name = profile.name;
             user.picture = profile.picture;
@@ -329,23 +315,21 @@ Plume = (function () {
             authors[webid] = user;
             saveLocalAuthors();
             // add workspaces
-            getWorkspaces(webid, g).then(function(ws){
-              user.workspaces = ws;
-              // save to local storage and refresh page
-              saveLocalStorage();
-              if (reload) {
-                window.location.reload();
-              }
-            }).catch(function(err) {
-              showError(err);
-              // save to local storage and refresh page
-              saveLocalStorage();
-              if (reload) {
-                window.location.reload();
-              }
+            Solid.identity.getWorkspaces(webid, g).then((ws) => {
+                user.workspaces = ws;
+                // save to local storage and refresh page
+                saveLocalStorage();
+                if (reload) {
+                  window.location.reload();
+                }
+            }).catch((err) => {
+                showError(err);
+                // save to local storage and refresh page
+                saveLocalStorage();
+                if (reload) {
+                  window.location.reload();
+                }
             });
-          });
-
         });
     };
 
@@ -709,7 +693,7 @@ Plume = (function () {
             var writer = Solid.web.put(url, triples);
         } else {
             var slug = makeSlug(post.title);
-            var writer = Solid.web.post(config.postsURL, triples, slug);
+            var writer = Solid.web.post(config.postsURL, slug, triples);
         }
         writer.then(
             function(res) {
@@ -737,9 +721,8 @@ Plume = (function () {
         postsdiv.innerHTML = '';
         // ask only for sioc:Post resources
         Solid.web.get(url).then(
-            function(resp) {
+            function(g) {
                 var _posts = [];
-                var g = resp.parsedGraph();
                 var st = g.statementsMatching(undefined, RDF('type'), SIOC('Post'));
                 // fallback to containment triples
                 if (st.length === 0) {
@@ -849,14 +832,7 @@ Plume = (function () {
     var fetchPost = function(url) {
         var promise = new Promise(function(resolve, reject){
             Solid.web.get(url).then(
-                function(resp) {
-                    var g;
-                    try {
-                      g = resp.parsedGraph();
-                    } catch(e) { 
-                      reject(err);
-                    }
-
+                function(g) {
                     var subject = g.any(undefined, RDF('type'), SIOC('Post'));
 
                     if (!subject) {
@@ -952,8 +928,9 @@ Plume = (function () {
             return;
         }
         authors[webid].lock = true;
-        Solid.getProfile(webid).
-        then(function(profile) {
+        Solid.identity.getProfile(webid).
+        then(function(g) {
+            var profile = getUserProfile(webid, g);
             if (len(profile) > 0) {
                 authors[webid].updated = true;
                 authors[webid].name = profile.name;
@@ -1540,139 +1517,6 @@ Plume = (function () {
             notify('sticky', 'Persistence functionality is disabled while cookies are disabled.');
             console.log(err);
         }
-    };
-
-
-    var getProfile = function(url) {
-        var promise = new Promise(function(resolve, reject) {
-            // Load main profile
-            Solid.web.get(url).then(
-                function(resp) {
-                    // set WebID
-                    var graph = resp.parsedGraph(); 
-                    var webid = graph.any($rdf.sym(url), FOAF('primaryTopic'));
-                    // find additional resources to load
-                    var sameAs = graph.statementsMatching(webid, OWL('sameAs'), undefined);
-                    var seeAlso = graph.statementsMatching(webid, OWL('seeAlso'), undefined);
-                    var prefs = graph.statementsMatching(webid, PIM('preferencesFile'), undefined);
-                    var toLoad = sameAs.length + seeAlso.length + prefs.length;
-
-                    // sync promises externally instead of using Promise.all() which fails if one GET fails
-                    var syncAll = function() {
-                        if (toLoad === 0) {
-                            return resolve(graph);
-                        }
-                    }
-                    // Load sameAs files
-                    if (sameAs.length > 0) {
-                        sameAs.forEach(function(same){
-                            Solid.web.get(same.object.value).then(
-                                function(resp) {
-                                    var g = resp.parsedGraph();
-                                    appendGraph(graph, g);
-                                    toLoad--;
-                                    syncAll();
-                                }
-                            ).catch(
-                            function(err){
-                                toLoad--;
-                                syncAll();
-                            });
-                        });
-                    }
-                    // Load seeAlso files
-                    if (seeAlso.length > 0) {
-                        seeAlso.forEach(function(see){
-                            Solid.web.get(see.object.value).then(
-                                function(resp) {
-                                    var g = resp.parsedGraph();
-                                    appendGraph(graph, g, see.object.value);
-                                    toLoad--;
-                                    syncAll();
-                                }
-                            ).catch(
-                            function(err){
-                                toLoad--;
-                                syncAll();
-                            });
-                        });
-                    }
-                    // Load preferences files
-                    if (prefs.length > 0) {
-                        prefs.forEach(function(pref){
-                            Solid.web.get(pref.object.value).then(
-                                function(resp) {
-                                    var g = resp.parsedGraph();
-                                    appendGraph(graph, g, pref.object.value);
-                                    toLoad--;
-                                    syncAll();
-                                }
-                            ).catch(
-                            function(err){
-                                toLoad--;
-                                syncAll();
-                            });
-                        });
-                    }
-                }
-            )
-            .catch(
-                function(err) {
-                    reject(err);
-                }
-            );
-        });
-
-        return promise;
-    };
-
-    // Find the user's workspaces
-    // Return an object with the list of objects (workspaces)
-    var getWorkspaces = function(webid, graph) {
-        var promise = new Promise(function(resolve, reject){
-            if (!graph) {
-                // fetch profile and call function again
-                getProfile(webid).then(function(g) {
-                    getWorkspaces(webid, g).then(function(ws) {
-                        return resolve(ws);
-                    }).catch(function(err) {
-                        return reject(err);
-                    });
-                }).catch(function(err){
-                    return reject(err);
-                });
-            } else {
-                // find workspaces
-                var workspaces = [];
-                var ws = graph.statementsMatching($rdf.sym(webid), PIM('workspace'), undefined);
-                if (ws.length === 0) {
-                    return resolve(workspaces);
-                }
-                ws.forEach(function(w){
-                    // try to get some additional info - i.e. desc/title
-                    var workspace = {};
-                    var title = graph.any(w.object, DCT('title'));
-                    if (title && title.value) {
-                        workspace.title = title.value;
-                    }
-                    workspace.url = w.object.uri;
-                    workspace.statements = graph.statementsMatching(w.object, undefined, undefined);
-                    workspaces.push(workspace);
-                });
-                return resolve(workspaces);
-            }
-        });
-
-        return promise;
-    };
-
-
-    // append statements from one graph object to another
-    var appendGraph = function(toGraph, fromGraph, docURI) {
-        var why = (docURI)?$rdf.sym(docURI):undefined;
-        fromGraph.statementsMatching(undefined, undefined, undefined, why).forEach(function(st) {
-            toGraph.add(st.subject, st.predicate, st.object, st.why);
-        });
     };
 
 
