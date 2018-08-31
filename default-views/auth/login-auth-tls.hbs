@@ -50,6 +50,7 @@
             document.querySelector('#error_msg').innerText = response.statusText
             return
           }
+/****
           const webId = response.headers.get('user')
           const idp = new URL(webId).origin
           const session = { authType: 'WebID-TLS', webId, idp }
@@ -62,7 +63,7 @@
           }
           authClientStore.session = session
           localStorage.setItem(authClientNamespace, JSON.stringify(authClientStore))
-
+****/
           response.text().then(function(text) {
             try {
               const url = new URL(text)
