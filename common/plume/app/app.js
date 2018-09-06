@@ -16,7 +16,7 @@ Plume = (function () {
 
     Solid.config.proxyUrl = PROXY;
     Solid.config.timeout = TIMEOUT;
-    Solid.fetch = solid.auth.fetch;
+    Solid.fetch = SolidAuthClient.fetch;
     $rdf.Fetcher.crossSiteProxyTemplate = PROXY;
     // common vocabs
     var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -106,7 +106,7 @@ Plume = (function () {
         applyConfig(configData);
 
     // Render the session state
-    solid.auth
+    SolidAuthClient
       .currentSession()
       .then((session) => {
          if (session) {
@@ -262,7 +262,7 @@ Plume = (function () {
     // Log user in
     var login = function() {
         // Get the current user
-      solid.auth
+      SolidAuthClient
         .popupLogin({ popupUri })
         .then((session) => {
            if (session) {
@@ -290,7 +290,7 @@ Plume = (function () {
         user = defaultUser;
         clearLocalStorage();
         showLogin();
-        solid.auth
+        SolidAuthClient
           .logout()
           .then(() => {
             window.location.reload();
@@ -675,17 +675,26 @@ Plume = (function () {
         //TODO also write tags - use sioc:topic -> uri
         var XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#")
         var g = new $rdf.graph();
-        g.add($rdf.sym(''), RDF('type'), SIOC('Post'));
-        g.add($rdf.sym(''), DCT('title'), $rdf.lit(post.title));
-        g.add($rdf.sym(''), SIOC('has_creator'), $rdf.sym('#author'));
-        g.add($rdf.sym(''), DCT('created'), $rdf.lit(post.created, '', XSD('datetime')));
-        g.add($rdf.sym(''), DCT('modified'), $rdf.lit(post.modified, '', XSD('datetime')));
-        g.add($rdf.sym(''), SIOC('content'), $rdf.lit(encodeHTML(post.body)));
+        var slug;
+        var GRAPH;
 
-        g.add($rdf.sym('#author'), RDF('type'), SIOC('UserAccount'));
-        g.add($rdf.sym('#author'), SIOC('account_of'), $rdf.sym(post.author));
-        g.add($rdf.sym('#author'), FOAF('name'), $rdf.lit(authors[post.author].name));
-        g.add($rdf.sym('#author'), SIOC('avatar'), $rdf.sym(authors[post.author].picture));
+        if (!url) {
+          GRAPH = $rdf.Namespace(config.postsURL + makeSlug(post.title) + '.ttl');
+        } else {
+          GRAPH = $rdf.Namespace(url);
+        }
+
+        g.add(GRAPH('#'), RDF('type'), SIOC('Post'));
+        g.add(GRAPH('#'), DCT('title'), $rdf.lit(post.title));
+        g.add(GRAPH('#'), SIOC('has_creator'), GRAPH('#author'));
+        g.add(GRAPH('#'), DCT('created'), $rdf.lit(post.created, '', XSD('datetime')));
+        g.add(GRAPH('#'), DCT('modified'), $rdf.lit(post.modified, '', XSD('datetime')));
+        g.add(GRAPH('#'), SIOC('content'), $rdf.lit(encodeHTML(post.body)));
+
+        g.add(GRAPH('#author'), RDF('type'), SIOC('UserAccount'));
+        g.add(GRAPH('#author'), SIOC('account_of'), $rdf.sym(post.author));
+        g.add(GRAPH('#author'), FOAF('name'), $rdf.lit(authors[post.author].name));
+        g.add(GRAPH('#author'), SIOC('avatar'), $rdf.sym(authors[post.author].picture));
 
         var triples = new $rdf.Serializer(g).toN3(g);
 

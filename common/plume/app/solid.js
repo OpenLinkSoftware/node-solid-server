@@ -320,7 +320,7 @@ Solid.web = (function(window) {
                   if (resp.status === 200 || resp.status === 201) {  
                     return Promise.resolve(parseResponseMeta(resp))  
                   } else {  
-                    return Promise.reject({status: resp.ststus, msg: resp.statusText})
+                    return Promise.reject({status: resp.status, msg: resp.statusText})
                   }  
                })
         return promise;
@@ -346,7 +346,7 @@ Solid.web = (function(window) {
                   if (resp.status === 200 || resp.status === 201) {  
                     return Promise.resolve(parseResponseMeta(resp))  
                   } else {  
-                    return Promise.reject({status: resp.ststus, msg: resp.statusText})
+                    return Promise.reject({status: resp.status, msg: resp.statusText})
                   }  
                })
         return promise;
@@ -364,7 +364,7 @@ Solid.web = (function(window) {
                   if (resp.status === 200) {  
                     return Promise.resolve(true)  
                   } else {  
-                    return Promise.reject({status: resp.ststus, msg: resp.statusText})
+                    return Promise.reject({status: resp.status, msg: resp.statusText})
                   }  
                })
         return promise;
