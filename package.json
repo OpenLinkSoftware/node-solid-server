@@ -1,7 +1,7 @@
 {
   "name": "solid-server",
   "description": "Solid server on top of the file-system",
-  "version": "4.1.1",
+  "version": "4.1.2-rc.0",
   "author": {
     "name": "Tim Berners-Lee",
     "email": "timbl@w3.org"
@@ -30,9 +30,10 @@
     "type": "git",
     "url": "https://github.com/solid/node-solid-server"
   },
-  "homepage": "http://github.com/solid/node-solid-server",
-  "bugs": "http://github.com/solid/node-solid-server/issues",
+  "homepage": "https://github.com/solid/node-solid-server",
+  "bugs": "https://github.com/solid/node-solid-server/issues",
   "dependencies": {
+    "@solid/oidc-auth-manager": "git+https://github.com/OpenLinkSoftware/oidc-auth-manager#openlink",
     "body-parser": "^1.18.3",
     "busboy": "^0.2.12",
     "camelize": "^1.0.0",
@@ -56,40 +57,38 @@
     "li": "^1.0.1",
     "mime-types": "^2.1.11",
     "negotiator": "^0.6.0",
+    "node-fetch": "^2.1.2",
     "node-forge": "^0.6.38",
     "nodemailer": "^3.1.4",
-    "oidc-auth-manager": "git+https://github.com/OpenLinkSoftware/oidc-auth-manager.git#openlink",
     "oidc-op-express": "^0.0.3",
-    "rdflib": "git+https://github.com/OpenLinkSoftware/rdflib.js.git#openlink",
+    "rdflib": "^0.17.1",
     "recursive-readdir": "^2.1.0",
     "rimraf": "^2.5.0",
+    "solid-auth-client": "git+https://github.com/OpenLinkSoftware/solid-auth-client.git#openlink",
     "solid-namespace": "^0.1.0",
-    "solid-permissions": "^0.5.2",
+    "solid-permissions": "^0.6.0",
     "solid-ws": "^0.2.3",
     "ulid": "^0.1.0",
     "uuid": "^3.0.0",
     "valid-url": "^1.0.9",
     "vhost": "^3.0.2",
-    "webid": "git+https://github.com/OpenLinkSoftware/node-webid.git#openlink"
-  },
-  "optionalDependencies": {
-    "x509": "^0.3.2"
+    "webid": "^0.3.10"
   },
   "devDependencies": {
-    "@trust/oidc-op": "^0.3.0",
+    "@solid/oidc-op": "0.3.2",
+    "@solid/solid-auth-oidc": "^0.2.2",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "dirty-chai": "^1.2.2",
     "localstorage-memory": "^1.0.2",
     "mocha": "^5.1.1",
     "nock": "^9.0.14",
-    "node-fetch": "^1.7.1",
     "node-mocks-http": "^1.7.0",
-    "nyc": "^10.1.2",
+    "nyc": "^13.0.1",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.8.0",
+    "snyk": "^1.88.2",
     "sonarjs": "^1.0.0",
-    "solid-auth-oidc": "git+https://github.com/OpenLinkSoftware/solid-auth-oidc.git#openlink",
     "standard": "^8.6.0",
     "supertest": "^3.0.0",
     "whatwg-url": "^6.1.0"

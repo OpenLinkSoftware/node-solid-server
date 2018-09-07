@@ -20,8 +20,9 @@ function getVersion () {
     const options = { cwd: __dirname, encoding: 'utf8' }
     const { stdout } = spawnSync('git', ['describe', '--tags'], options)
     const version = stdout.trim()
-    if (version.length == 0)
-      throw 'Could not found version in git'
+    if (version.length === 0) {
+      throw new Error('Could not found version in git')
+    }
     return version
   } catch (e) {
     // Obtain version from package.json
