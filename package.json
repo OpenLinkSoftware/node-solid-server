@@ -75,7 +75,7 @@
     "webid": "^0.3.10"
   },
   "devDependencies": {
-    "@solid/oidc-op": "0.3.2",
+    "@solid/oidc-op": "0.4.0",
     "@solid/solid-auth-oidc": "^0.2.2",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
