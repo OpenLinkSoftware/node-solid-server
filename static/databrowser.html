@@ -17,7 +17,7 @@
     const UI = panes.UI
     const $rdf = UI.rdf
 
-    $rdf.Fetcher.crossSiteProxyTemplate = document.origin + '/proxy?uri={uri}';
+    $rdf.Fetcher.crossSiteProxyTemplate = window.origin + '/proxy?uri={uri}';
     var uri = window.location.href;
 
     window.document.title = 'Loading ' + uri
