@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html id="docHTML">
 <head>
+<!--  <link type="text/css" rel="stylesheet" href="https://solid.github.io/solid-panes/style/tabbedtab.css" />  -->
     <link type="text/css" rel="stylesheet" href="/common/css/tabbedtab.css" />
     <script>
       var $SOLID_GLOBAL_config = {
@@ -8,18 +9,20 @@
       }
     </script>
 <!-- <script type="text/javascript" src="https://linkeddata.github.io/mashlib/dist/mashlib.min.js"></script> -->
-<script type="text/javascript" src="/common/js/mashlib.min.js"></script>
-<script>
+    <script type="text/javascript" src="/common/js/mashlib.min.js"></script>
+    <script>
 
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const panes  = require('mashlib')
+  document.addEventListener('DOMContentLoaded', function () {
+    const panes = require('mashlib')
     const UI = panes.UI
+
+    // Set up cross-site proxy
     const $rdf = UI.rdf
 
     $rdf.Fetcher.crossSiteProxyTemplate = window.origin + '/proxy?uri={uri}';
-    var uri = window.location.href;
 
+    // Authenticate the user    
+    const uri = window.location.href;
     window.document.title = 'Loading ' + uri
 
     UI.authn.checkUser()
