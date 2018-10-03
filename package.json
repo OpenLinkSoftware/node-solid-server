@@ -1,7 +1,7 @@
 {
   "name": "solid-server",
   "description": "Solid server on top of the file-system",
-  "version": "4.1.4",
+  "version": "4.1.6",
   "author": {
     "name": "Tim Berners-Lee",
     "email": "timbl@w3.org"
@@ -37,7 +37,7 @@
     "body-parser": "^1.18.3",
     "busboy": "^0.2.12",
     "camelize": "^1.0.0",
-    "colors": "^1.1.2",
+    "colorette": "^1.0.5",
     "commander": "^2.9.0",
     "cors": "^2.7.1",
     "debug": "^2.6.9",
@@ -55,7 +55,7 @@
     "ip-range-check": "0.0.2",
     "is-ip": "^2.0.0",
     "li": "^1.0.1",
-    "mashlib": "^0.7.12",
+    "mashlib": "^0.7.13",
     "mime-types": "^2.1.11",
     "negotiator": "^0.6.0",
     "node-fetch": "^2.1.2",
@@ -76,7 +76,7 @@
     "webid": "^0.3.10"
   },
   "devDependencies": {
-    "@solid/oidc-op": "0.4.0",
+    "@solid/oidc-op": "^0.4.0",
     "@solid/solid-auth-oidc": "^0.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
