@@ -1,7 +1,7 @@
 {
   "name": "solid-server",
   "description": "Solid server on top of the file-system",
-  "version": "4.1.6",
+  "version": "4.1.7",
   "author": {
     "name": "Tim Berners-Lee",
     "email": "timbl@w3.org"
@@ -23,6 +23,11 @@
       "name": "Ruben Verborgh",
       "email": "ruben@verborgh.org",
       "url": "https://ruben.verborgh.org/"
+    },
+    {
+      "name": "Kjetil Kjernsmo",
+      "email": "kjetil@inrupt.com",
+      "url": "http://kjetil.kjernsmo.net/"
     }
   ],
   "license": "MIT",
@@ -33,7 +38,7 @@
   "homepage": "https://github.com/solid/node-solid-server",
   "bugs": "https://github.com/solid/node-solid-server/issues",
   "dependencies": {
-    "@solid/oidc-auth-manager": "^0.16.4",
+    "@solid/oidc-auth-manager": "^0.17.0",
     "body-parser": "^1.18.3",
     "busboy": "^0.2.12",
     "camelize": "^1.0.0",
@@ -99,7 +104,8 @@
     "standard": "standard '{bin,examples,lib,test}/**/*.js'",
     "nyc": "NODE_TLS_REJECT_UNAUTHORIZED=0 nyc --reporter=text-summary mocha",
     "mocha": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha",
-    "test": "npm run standard && npm run nyc"
+    "test": "npm run standard && npm run nyc",
+    "clean": "rimraf config/templates config/views"
   },
   "nyc": {
     "reporter": [
