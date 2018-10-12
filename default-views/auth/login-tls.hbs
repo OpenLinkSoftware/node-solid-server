@@ -1,27 +1,31 @@
-<form id="tls" method="post" action="/login/tls">
+<div class="panel panel-default panel-login-tls">
+  <div class="panel-body">
+  
+    <form id="tls" method="post" action="{{tlsUrl}}">
 
 {{#unless enablePassword }}
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-12">
-        <label for="username">Username:</label>
-        <input type="text" class="form-control" name="username" id="username" placeholder="alice" />
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="username">Username:</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="alice" />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 {{/unless}}
   
-  <div class="form-group">
+      <div class="form-group">
 
-    <button type="submit" class="btn btn-primary" id="login-tls">
-      With Certificate (WebId+Delegate-TLS)
-    </button>
+        <button type="submit" class="btn btn-lg btn-primary" id="login-tls">
+          Log in with Certificate (WebId+Delegate-TLS)
+        </button>
 
-    {{> auth/auth-hidden-fields}}
+        {{> auth/auth-hidden-fields}}
 
+      </div>
+    </form>
   </div>
-</form>
-
+</div>
 <script type="text/javascript">
   const button = document.getElementById('login-tls')
   button.addEventListener('click', function(event) {
