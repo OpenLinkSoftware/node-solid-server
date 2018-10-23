@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Personal Data Space (or POD) {{#if name}} of {{name}} {{/if}}</title>
   <link rel="stylesheet" href="/common/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/common/css/server.css">
-  
+  <link rel="stylesheet" href="/common/css/solid.css">
+
   <style>
     .session-action {
       margin-right: 15px;
@@ -34,25 +34,20 @@
       </div>
     </div>
   </nav>
-</div>
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
-      <p class="lead">
-        <span>
-          This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
-          <div id="update_profile">
-            <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
-            <button type="button" class="btn btn-primary" id="create-csr">Create Cert. Signature Request</button>
-          </div>
-        </span>
-      </p>
-    </div>
-  </div>
+
+  <p class="lead">
+    <span>
+      This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
+      <div id="update_profile">
+        <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
+        <button type="button" class="btn btn-primary" id="create-csr">Create Cert. Signature Request</button>
+      </div>
+    </span>
+  </p>
 
 {{#if tlsCertWebid}}
-  <div class="row" id="update_delegator_profile">
-    <div class="col-md-12">
+  <section>
+    <div class="list-group">
       <p class="lead">
         If you want to make use of the WebID-TLS+Delegation authentication protocol, add the following RDF statement to your Delegate's WebID-Profile Document or click "Update Delegator WebID-Profile Doc" button to attempt this action right now, assuming you are logged in using a WebID that Read+Write privileges on the target WebID-Profile document.
         <pre>
@@ -62,10 +57,10 @@
           <input id="load_btn" class="btn btn-primary" value=" Update Delegator WebID-Profile Doc " type="button">
         </span>
       </p>
-    </div>
-  </div>
+    </div>  
+  </section>
 {{/if}}
-
+  
   <section>
     <h1>Data</h1>
     <div class="list-group">
@@ -83,6 +78,7 @@
       </a>
     </div>
   </section>
+  
   <section>
     <h1>Apps</h1>
     <div class="list-group">
@@ -95,6 +91,15 @@
     </div>
   </section>
 
+  <section class="hidden" id="account-settings">
+    <h1>Account settings</h1>
+    <div class="list-group">
+      <a href="/account/delete/" class="list-group-item">
+        <span class="lead">Delete account</span>
+      </a>
+    </div>
+  </section>
+  
 <!-- Modal -->
 <div class="modal fade" id="certModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:500px" role="document">
@@ -399,21 +404,22 @@
 
 (function () {
     'use strict'
-    var button = document.getElementById('session-action')
-    var loggedIn = false
-    var certData = {}
-    var certDays = 60
-    const webId = '{{webId}}'
+    var button = document.getElementById('session-action');
+    var loggedIn = false;
+    var accountSettings = document.getElementById('account-settings');
+    var loggedHref = document.getElementById('logged-href')
+    var certData = {};
+    var certDays = 60;
+    const webId = '{{webId}}';
 
-    solid.auth.trackSession(session => {
-      loggedIn = !!session
-      button.innerText = loggedIn ? 'Log out' : 'Log in'
+    solid.auth.trackSession(function(session) {
+      loggedIn = !!session;
+      button.innerText = loggedIn ? 'Log out' : 'Log in';
       button.classList.remove('btn-default');
       button.classList.remove('btn-danger');
       button.classList.remove('btn-primary');
       button.classList.add(loggedIn ? 'btn-danger' : 'btn-primary')
 
-      const loggedHref = document.getElementById('logged-href')
       if (loggedIn) {
         if (session.webId) {
           loggedHref.style.display = 'initial'
@@ -424,6 +430,10 @@
         /* fetch prefs.ttl for force receive connect.sid cookie */
         solid.auth.fetch(location.origin + '/settings/prefs.ttl',
                    { credentials: 'include' })
+
+        var sessionOrigin = getOriginFromWebId(session.webId);
+        var isOwner = sessionOrigin === location.origin;
+        accountSettings.classList.toggle('hidden', !isOwner);
 
       } else {
         loggedHref.style.display = 'none'
@@ -436,66 +446,74 @@
 
 
     button.addEventListener('click', function () {
-      loggedIn ? solid.auth.logout() : solid.auth.popupLogin()
-    })
+      loggedIn ? solid.auth.logout() : solid.auth.popupLogin();
+    });
 
-
-    const init = window.location.hash === '#init'
-    let update_delegator_profile = document.querySelector('#update_delegator_profile');
-    if (update_delegator_profile) {
-      update_delegator_profile.hidden = !init
+    function getOriginFromWebId(webId) {
+      if (window.URL.prototype) {
+        return new URL(webId).origin;
+      }
+      var uriParts = webId.split('/');
+      return uriParts[0] + '//' + uriParts[2];
     }
-    let update_profile = document.querySelector('#update_profile');
-    if (update_profile) {
-      update_profile.hidden = !init
-    }
-  
-    getCertDays()
-  
-    const btnLoad = document.getElementById('load_btn')
-    if (btnLoad)
-      btnLoad.addEventListener('click', updateData)
-
-    const btnShowGenCert = document.getElementById('update_cert')
-    btnShowGenCert.addEventListener('click', showGenCertificate)
-    const btnUploadCert = document.getElementById('upload_cert')
-    btnUploadCert.addEventListener('click', uploadCertificate)
-    const btnShowGenCSR = document.getElementById('create-csr')
-    btnShowGenCSR.addEventListener('click', showGenCSR)
-
-    const btnLoadPemFile = document.getElementById('cert-file-load')
-    btnLoadPemFile.addEventListener('change', handleLoadPemFile)
     
-    const btnUploadExistedCert = document.getElementById('upload-existed-cert')
-    btnUploadExistedCert.addEventListener('click', uploadExistedCertificate)
+
+    var init = window.location.hash === '#init';
+    var update_delegator_profile = document.querySelector('#update_delegator_profile');
+    if (update_delegator_profile) {
+      update_delegator_profile.hidden = !init;
+    }
+    var update_profile = document.querySelector('#update_profile');
+    if (update_profile) {
+      update_profile.hidden = !init;
+    }
+  
+    getCertDays();
+  
+    var btnLoad = document.getElementById('load_btn');
+    if (btnLoad)
+      btnLoad.addEventListener('click', updateData);
+
+    var btnShowGenCert = document.getElementById('update_cert');
+    btnShowGenCert.addEventListener('click', showGenCertificate);
+    var btnUploadCert = document.getElementById('upload_cert');
+    btnUploadCert.addEventListener('click', uploadCertificate);
+    var btnShowGenCSR = document.getElementById('create-csr');
+    btnShowGenCSR.addEventListener('click', showGenCSR);
+
+    var btnLoadPemFile = document.getElementById('cert-file-load');
+    btnLoadPemFile.addEventListener('change', handleLoadPemFile);
+    
+    var btnUploadExistedCert = document.getElementById('upload-existed-cert');
+    btnUploadExistedCert.addEventListener('click', uploadExistedCertificate);
 
 
     $('#collapseOne').on('show.bs.collapse', function () {
-      $('#collapseTwo').collapse('hide')
+      $('#collapseTwo').collapse('hide');
     })
     $('#collapseTwo').on('show.bs.collapse', function () {
-      $('#collapseOne').collapse('hide')
+      $('#collapseOne').collapse('hide');
     })
 
-    const btnGenCert = document.getElementById('gen-cert-btn')
-    btnGenCert.addEventListener('click', genCertificate)
+    var btnGenCert = document.getElementById('gen-cert-btn');
+    btnGenCert.addEventListener('click', genCertificate);
 
-    const btnGenCsr = document.getElementById('gen-csr-btn')
-    btnGenCsr.addEventListener('click', genCSRequest)
+    var btnGenCsr = document.getElementById('gen-csr-btn');
+    btnGenCsr.addEventListener('click', genCSRequest);
   
 
     function updateData() {
-      let prof_url = '{{tlsCertWebid}}'
-      let delegator = '{{webId}}'
-      let rel_add = '\n <'+prof_url+'> <http://www.openlinksw.com/schemas/cert#onBehalfOf>  <'+delegator+'> . \n'
-      let file_url = new URL(prof_url)
+      var prof_url = '{{tlsCertWebid}}';
+      var delegator = '{{webId}}';
+      var rel_add = '\n <'+prof_url+'> <http://www.openlinksw.com/schemas/cert#onBehalfOf>  <'+delegator+'> . \n';
+      var file_url = new URL(prof_url);
 
       if (file_url.protocol === 'http:')
-        file_url.protocol = 'https:'
+        file_url.protocol = 'https:';
 
-      file_url.hash = ''
+      file_url.hash = '';
 
-      event.preventDefault()
+      event.preventDefault();
 
       var query = `INSERT { <${prof_url}> <http://www.openlinksw.com/schemas/cert#onBehalfOf>  <${delegator}> . }`;
 
@@ -509,9 +527,9 @@
         })
        .then(function(response) {
           if (!response.ok) {
-            throw new Error('Network update request was not ok. HTTP='+response.status+'  '+response.statusText)
+            throw new Error('Network update request was not ok. HTTP='+response.status+'  '+response.statusText);
           }
-          alert('Your profile file '+prof_url+' was updated.')
+          alert('Your profile file '+prof_url+' was updated.');
        })
        .catch(function(error) {
          alert(error);
@@ -520,159 +538,159 @@
 
     function showGenCertificate() {
 
-      document.getElementById('cert_pwd').value = ''
-      document.getElementById('cert_pwd1').value = ''
-      document.getElementById('upload_cert').disabled = true
-      document.getElementById('cert-data').value = ''
-      document.getElementById('cert-file-load').value = ''
+      document.getElementById('cert_pwd').value = '';
+      document.getElementById('cert_pwd1').value = '';
+      document.getElementById('upload_cert').disabled = true;
+      document.getElementById('cert-data').value = '';
+      document.getElementById('cert-file-load').value = '';
 
-      $('#certModal').modal('show')
+      $('#certModal').modal('show');
     }
 
 
     function showGenCSR() {
 
-      document.getElementById('csr_pwd').hidden = true
-      document.getElementById('csr_pwd1').hidden = true
+      document.getElementById('csr_pwd').hidden = true;
+      document.getElementById('csr_pwd1').hidden = true;
 
-      $('#csrModal').modal('show')
+      $('#csrModal').modal('show');
     }
 
 
     function genCSRequest() {
       certData = {};
 
-      let name = document.getElementById('csr_name').value;
-      let email = document.getElementById('csr_email').value;
-      let certOrg = document.getElementById('csr_Org').value;
-      let certOrgUnit = document.getElementById('csr_OrgUnit').value;
-      let certCity = document.getElementById('csr_City').value;
-      let certState = document.getElementById('csr_State').value;
-      let certCountry = document.getElementById('csr_Country').value;
-      let certPwd = document.getElementById('csr_pwd').value;
-      let certPwd1 = document.getElementById('csr_pwd1').value;
+      var name = document.getElementById('csr_name').value;
+      var email = document.getElementById('csr_email').value;
+      var certOrg = document.getElementById('csr_Org').value;
+      var certOrgUnit = document.getElementById('csr_OrgUnit').value;
+      var certCity = document.getElementById('csr_City').value;
+      var certState = document.getElementById('csr_State').value;
+      var certCountry = document.getElementById('csr_Country').value;
+      var certPwd = document.getElementById('csr_pwd').value;
+      var certPwd1 = document.getElementById('csr_pwd1').value;
 
       if (certCountry.length > 0 && certCountry.length!=2) {
-        alert('Country must be two characters')
+        alert('Country must be two characters');
         return
       }
       if (name.length < 1) {
-        alert('Name is empty')
+        alert('Name is empty');
         return
       }
 
       if (certPwd != certPwd1)  {
-        alert('Confirm Private Key password with properly value')
+        alert('Confirm Private Key password with properly value');
         return
       }
 
 
-      document.getElementById('csr-download').removeAttribute('href')
-      document.getElementById('pkey-download').removeAttribute('href')
-      document.getElementById('csr-text').textContent = ''
-      document.getElementById('csr_wait').hidden = false
+      document.getElementById('csr-download').removeAttribute('href');
+      document.getElementById('pkey-download').removeAttribute('href');
+      document.getElementById('csr-text').textContent = '';
+      document.getElementById('csr_wait').hidden = false;
 
-      $('#csrModal').modal('hide')
-      $('#csrReadyModal').modal('show')
+      $('#csrModal').modal('hide');
+      $('#csrReadyModal').modal('show');
 
       setTimeout(function() {
 
-        certData = genCSR(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd)
+        certData = genCSR(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd);
 
-        document.getElementById('csr-text').textContent = certData.pem
+        document.getElementById('csr-text').textContent = certData.pem;
 
         var csrUrl = "data:application/octet-stream;charset=UTF-8;base64," + btoa(certData.pem);
         document.getElementById("csr-download").setAttribute("href", csrUrl);
         var pkeyUrl = "data:application/octet-stream;charset=UTF-8;base64," + btoa(certData.pkey);
         document.getElementById("pkey-download").setAttribute("href", pkeyUrl);
-        document.getElementById('csr_wait').hidden = true
+        document.getElementById('csr_wait').hidden = true;
 
 
       }, 500);
 
 
-      return false
+      return false;
     }
 
   
     function genCertificate() {
       certData = {};
 
-      let name = document.getElementById('cert_name').value;
-      let email = document.getElementById('cert_email').value;
-      let certOrg = document.getElementById('cert_Org').value;
-      let certOrgUnit = document.getElementById('cert_OrgUnit').value;
-      let certCity = document.getElementById('cert_City').value;
-      let certState = document.getElementById('cert_State').value;
-      let certCountry = document.getElementById('cert_Country').value;
-      let certPwd = document.getElementById('cert_pwd').value;
-      let certPwd1 = document.getElementById('cert_pwd1').value;
+      var name = document.getElementById('cert_name').value;
+      var email = document.getElementById('cert_email').value;
+      var certOrg = document.getElementById('cert_Org').value;
+      var certOrgUnit = document.getElementById('cert_OrgUnit').value;
+      var certCity = document.getElementById('cert_City').value;
+      var certState = document.getElementById('cert_State').value;
+      var certCountry = document.getElementById('cert_Country').value;
+      var certPwd = document.getElementById('cert_pwd').value;
+      var certPwd1 = document.getElementById('cert_pwd1').value;
 
       if (certPwd.length < 1)  {
-        alert('Certificate password could not be empty')
+        alert('Certificate password could not be empty');
         return
       }
       if (certPwd != certPwd1)  {
-        alert('Confirm certificate password with properly value')
+        alert('Confirm certificate password with properly value');
         return
       }
 
       if (certCountry.length > 0 && certCountry.length!=2) {
-        alert('Country must be two characters')
+        alert('Country must be two characters');
         return
       }
       if (name.length < 1) {
-        alert('Name is empty')
+        alert('Name is empty');
         return
       }
 
-      document.getElementById('cert_pwd').value = ''
-      document.getElementById('cert_pwd1').value = ''
-      document.getElementById('cert_wait').hidden = false
-      document.getElementById('p12-cert').hidden = true
+      document.getElementById('cert_pwd').value = '';
+      document.getElementById('cert_pwd1').value = '';
+      document.getElementById('cert_wait').hidden = false;
+      document.getElementById('p12-cert').hidden = true;
       document.getElementById('pkcs12-download').removeAttribute('href');
 
-      $('#certModal').modal('hide')
-      $('#certReadyModal').modal('show')
+      $('#certModal').modal('hide');
+      $('#certReadyModal').modal('show');
 
       setTimeout(function() {
-        certData = genCert(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd)
+        certData = genCert(name, email, certOrg, certOrgUnit, certCity, certState, certCountry, webId, certPwd);
 
         var p12Url = 'data:application/x-pkcs12;base64,' + certData.pkcs12B64;
         document.getElementById('pkcs12-download').setAttribute('href', p12Url);
-        document.getElementById('p12-cert').hidden = false
-        document.getElementById('cert_wait').hidden = true
-        document.getElementById('upload_cert').disabled = false
+        document.getElementById('p12-cert').hidden = false;
+        document.getElementById('cert_wait').hidden = true;
+        document.getElementById('upload_cert').disabled = false;
 
       }, 500);
 
-      return false
+      return false;
     }
 
 
     function uploadExistedCertificate() {
-      let pki = forge.pki
-      certData = {}
-      let cert
-      let pemData = document.getElementById('cert-data').value
+      var pki = forge.pki;
+      certData = {};
+      var cert;
+      var pemData = document.getElementById('cert-data').value;
 
       if (pemData.length < 1) {
-        alert('Empty certificate')
+        alert('Empty certificate');
         return
       }
 
-      certData.pem = pemData
+      certData.pem = pemData;
 
       try {
         cert = pki.certificateFromPem(pemData);
         if (!cert)
-          throw new Error('Could not parse Certificate PEM data')
+          throw new Error('Could not parse Certificate PEM data');
 
-        let ext_webId
-        let ext = cert.getExtension('subjectAltName')
+        var ext_webId;
+        var ext = cert.getExtension('subjectAltName');
         if (ext !== null && ext.altNames) {
           for(var i = 0; i < ext.altNames.length; ++i) {
-            let altName = ext.altNames[i];
+            var altName = ext.altNames[i];
             if(altName.type === 6) {
               ext_webId = altName.value;
               break;
@@ -680,26 +698,26 @@
           }
         }
         if (!ext_webId) {
-          throw new Error('Could not found WebId in Certificate')
+          throw new Error('Could not found WebId in Certificate');
         }
         if (ext_webId!==webId) {
-          throw new Error(`Found a wrong WebID=${webId} in Certificate `)
+          throw new Error(`Found a wrong WebID=${webId} in Certificate `);
         }
 
       } catch(e) {
-        alert(e)
+        alert(e);
         return
       }
 
-      uploadCertificate()
+      uploadCertificate();
     }
 
 
     function uploadCertificate() {
-      let formData  = new URLSearchParams();
-      formData.append('username', '{{username}}')
-      formData.append('certificatePEM', certData.pem)
-      formData.append('certificatePKCS12', certData.pkcs12B64)
+      var formData  = new URLSearchParams();
+      formData.append('username', '{{username}}');
+      formData.append('certificatePEM', certData.pem);
+      formData.append('certificatePKCS12', certData.pkcs12B64);
 
       fetch('/api/accounts/cert_new',
         { method: 'POST', 
@@ -713,29 +731,29 @@
       .then(function(response) {
         if (!response.ok) {
           if (response.status==401) {
-            throw new Error('HTTP='+response.status+'  '+response.statusText+'. ReLogin to your account')
+            throw new Error('HTTP='+response.status+'  '+response.statusText+'. ReLogin to your account');
           }
           else {
-            throw new Error('HTTP='+response.status+'  '+response.statusText)
+            throw new Error('HTTP='+response.status+'  '+response.statusText);
           }
         } else {
-          document.getElementById('upload_cert').disabled = true
-          let s = 'Certificate was registred on server \n'+
+          document.getElementById('upload_cert').disabled = true;
+          var s = 'Certificate was registred on server \n'+
              ' The following actions have been applied re. WebID-TLS protocol usage:\n'+
              '- WebID-Profile Relations Update re. Public Key (modulus and exponent)\n';
           if (certData.pkcs12B64 && certData.pkcs12B64.length > 1) {
               s += '- PKCS#12 identity card saved to ~profile folder\n';
           }
 
-          $('#certReadyModal').modal('hide')
-          $('#certModal').modal('hide')
-          alert(s)
+          $('#certReadyModal').modal('hide');
+          $('#certModal').modal('hide');
+          alert(s);
         }
       })
       .catch(function(error) {
-        $('#certReadyModal').modal('hide')
-        $('#certModal').modal('hide')
-        alert(error)
+        $('#certReadyModal').modal('hide');
+        $('#certModal').modal('hide');
+        alert(error);
       })
     }
 
@@ -747,48 +765,48 @@
     }
 
    function genCert(certName, certEmail, certOrg, certOrgUnit, certCity, certState, certCountry, webId, pwd) {
-     let pki = forge.pki
+     var pki = forge.pki;
 
      // generate a keypair and create an X.509v3 certificate
-     let keys = pki.rsa.generateKeyPair(2048)
-     var cert = pki.createCertificate()
-     cert.publicKey = keys.publicKey
+     var keys = pki.rsa.generateKeyPair(2048);
+     var cert = pki.createCertificate();
+     cert.publicKey = keys.publicKey;
      // NOTE: serialNumber is the hex encoded value of an ASN.1 INTEGER.
      // Conforming CAs should ensure serialNumber is:
      // - no more than 20 octets
      // - non-negative (prefix a '00' if your value starts with a '1' bit)
-     cert.serialNumber = (Date.now()).toString(16)
+     cert.serialNumber = (Date.now()).toString(16);
 
-     cert.validity.notBefore = new Date()
-     cert.validity.notAfter = addDays(new Date(), 60)
+     cert.validity.notBefore = new Date();
+     cert.validity.notAfter = addDays(new Date(), 60);
 //   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
 
-     let attrs = [];
+     var attrs = [];
      if (certName && certName.length > 1) {
-       attrs.push({ name: 'commonName', value: certName })
+       attrs.push({ name: 'commonName', value: certName });
      }
 
      if (certCountry && certCountry.length > 1) {
-        attrs.push({ name: 'countryName', value: certCountry })
+        attrs.push({ name: 'countryName', value: certCountry });
      }
 
      if (certState && certState.length > 1) {
-        attrs.push({ shortName: 'ST', value: certState })
+        attrs.push({ shortName: 'ST', value: certState });
      }
      if (certCity && certCity.length > 1) {
-        attrs.push({ name: 'localityName', value: certCity })
+        attrs.push({ name: 'localityName', value: certCity });
      }
      if (certOrgUnit && certOrgUnit.length > 1) {
-        attrs.push({ name: 'organizationalUnitName', value: certOrgUnit })
+        attrs.push({ name: 'organizationalUnitName', value: certOrgUnit });
      }
 
      if (certOrg && certOrg.length > 1) {
-        attrs.push({ name: 'organizationName', value: certOrg })
+        attrs.push({ name: 'organizationName', value: certOrg });
      } else {
-        attrs.push({ name: 'organizationName', value: 'WebID' })
+        attrs.push({ name: 'organizationName', value: 'WebID' });
      }
      if (certEmail && certEmail.length > 1) {
-        attrs.push({ name: 'emailAddress', value: certEmail})
+        attrs.push({ name: 'emailAddress', value: certEmail});
      }
 
      cert.setSubject(attrs);
@@ -807,59 +825,59 @@
        { name: 'subjectKeyIdentifier'}
      ])
 
-     cert.sign(keys.privateKey, forge.md.sha512.create())
+     cert.sign(keys.privateKey, forge.md.sha512.create());
 
-     let pemCert = pki.certificateToPem(cert);
+     var pemCert = pki.certificateToPem(cert);
 
-     let p12Asn1 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, [cert], pwd,
+     var p12Asn1 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, [cert], pwd,
           {generateLocalKeyId: true, 
            friendlyName: 'solid-cert',
            algorithm: '3des'
-           })
+           });
 
-     let p12Der = forge.asn1.toDer(p12Asn1).getBytes()
-     let p12B64 = forge.util.encode64(p12Der)
+     var p12Der = forge.asn1.toDer(p12Asn1).getBytes();
+     var p12B64 = forge.util.encode64(p12Der);
 
-     return {pem: pemCert, pkcs12B64: p12B64}
+     return {pem: pemCert, pkcs12B64: p12B64};
    }
 
 
    function genCSR(certName, certEmail, certOrg, certOrgUnit, certCity, certState, certCountry, webId, pwd) {
-     let pki = forge.pki
+     var pki = forge.pki;
 
      // generate a keypair and create an X.509v3 certificate
-     let keys = pki.rsa.generateKeyPair(2048)
+     var keys = pki.rsa.generateKeyPair(2048);
 
-     let csr = pki.createCertificationRequest()
-     csr.publicKey = keys.publicKey
+     var csr = pki.createCertificationRequest();
+     csr.publicKey = keys.publicKey;
 
-     let attrs = [];
+     var attrs = [];
      if (certName && certName.length > 1) {
-       attrs.push({ name: 'commonName', value: certName })
+       attrs.push({ name: 'commonName', value: certName });
      }
 
      if (certCountry && certCountry.length > 1) {
-        attrs.push({ name: 'countryName', value: certCountry })
+        attrs.push({ name: 'countryName', value: certCountry });
      }
 
      if (certState && certState.length > 1) {
-        attrs.push({ shortName: 'ST', value: certState })
+        attrs.push({ shortName: 'ST', value: certState });
      }
 
      if (certCity && certCity.length > 1) {
-        attrs.push({ name: 'localityName', value: certCity })
+        attrs.push({ name: 'localityName', value: certCity });
      }
      if (certOrgUnit && certOrgUnit.length > 1) {
-        attrs.push({ name: 'organizationalUnitName', value: certOrgUnit })
+        attrs.push({ name: 'organizationalUnitName', value: certOrgUnit });
      }
 
      if (certOrg && certOrg.length > 1) {
-        attrs.push({ name: 'organizationName', value: certOrg })
+        attrs.push({ name: 'organizationName', value: certOrg });
      } else {
-        attrs.push({ name: 'organizationName', value: 'WebID' })
+        attrs.push({ name: 'organizationName', value: 'WebID' });
      }
      if (certEmail && certEmail.length > 1) {
-        attrs.push({ name: 'emailAddress', value: certEmail})
+        attrs.push({ name: 'emailAddress', value: certEmail});
      }
 
      csr.setSubject(attrs);
@@ -881,25 +899,25 @@
            { name: 'extKeyUsage', clientAuth: true}
            ]
        }
-     ])
+     ]);
 
-     csr.sign(keys.privateKey, forge.md.sha512.create())
+     csr.sign(keys.privateKey, forge.md.sha512.create());
 
-     let pemCSR = pki.certificationRequestToPem(csr);
-     let pemPKey
+     var pemCSR = pki.certificationRequestToPem(csr);
+     var pemPKey;
 
      if (pwd.length > 0) {
-       let ekey = pki.encryptPrivateKeyInfo(pki.privateKeyToAsn1(keys.privateKey), 
+       var ekey = pki.encryptPrivateKeyInfo(pki.privateKeyToAsn1(keys.privateKey), 
                                      pwd,
                                      { algorithm: '3des',
                                        prfAlgorithm: 'sha512'
-                                     })
+                                     });
        pemPKey = pki.encryptedPrivateKeyToPem(ekey);
      } else {
-       pemPKey = pki.privateKeyToPem(keys.privateKey)
+       pemPKey = pki.privateKeyToPem(keys.privateKey);
      }
 
-     return {pem: pemCSR, pkey: pemPKey}
+     return {pem: pemCSR, pkey: pemPKey};
    }
 
 
@@ -911,9 +929,9 @@
      // noinspection AnonymousFunctionJS
      tempReader.onload = function (event) {
   	// noinspection JSUnresolvedVariable
-	let certBuffer = event.target.result;
-	let fld = document.getElementById('cert-data')
-	fld.value = ab2str(certBuffer)
+	var certBuffer = event.target.result;
+	var fld = document.getElementById('cert-data');
+	fld.value = ab2str(certBuffer);
      };
 
      tempReader.readAsArrayBuffer(currentFiles[0]);
@@ -934,16 +952,16 @@
         .then(function(response) {
           if (response.ok) {
             response.text().then((s)=> {
-              let days = parseInt(s, 10)
+              var days = parseInt(s, 10);
               if (days > 0) {
-                certDays = days
+                certDays = days;
               }
             })
           }
         })
    }
 
-})()
+})();
 
 </script>
 </html>

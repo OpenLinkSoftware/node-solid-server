@@ -2,25 +2,58 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-body">
+<!--
         <form method="post" id="reg-form" action="/api/accounts/new" onsubmit="return validatePasswordBeforeSubmit(e)">
+-->        
+        <form method="post" id="reg-form" action="/api/accounts/new">
           {{> shared/error}}
         
           <div class="form-group">
             <label class="control-label" for="username">Username:</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="alice"
                    required/>
+
+	    {{#if multiuser}}
+	    <p>Your username should be a lower-case word with only
+	    letters a-z and numbers 0-9 and without periods.</p>
+	    <p>Your public Solid POD URL will be:
+	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
+              document.write(window.location.host)
+	    </script></tt></p>
+	    <p>Your public Solid WebID will be:
+	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
+              document.write(window.location.host)
+	    </script>/profile/card#me</tt></p>
+
+	    <p>Your <em>POD URL</em> is like the homepage for your Solid
+	    pod. By default, it is readable by the public, but you can
+	    always change that if you like by changing the access
+	    control.</p>
+
+	    <p>Your <em>Solid WebID</em> is your globally unique name
+	    that you can use to identify and authenticate yourself with
+	    other PODs across the world.</p>
+	    {{/if}}
+
+	  </div>
+
+          <div class="form-group has-feedback">
+            <label class="control-label" for="password">Password:</label>
+            <input type="password" class="form-control control-progress" name="password" id="password" required/>
+            <span class="glyphicon glyphicon-remove form-control-feedback hidden" aria-hidden="true"></span>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="4"></div>
+            </div>
+            <div class="help-block"></div>
           </div>
 
-          <div class="form-group">
-            <label class="control-label" for="password">Password:</label>
-            <input type="password" class="form-control" name="password" id="password" required/>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" id="showPassword"/> Show Password
-              </label>
-            </div>
-            <span id="passwordHelp" class="text-danger"></span>
+
+          <div class="form-group has-feedback">
+            <label class="control-label" for="repeat_password">Repeat password*</label>
+            <input type="password" class="form-control" name="repeat_password" id="repeat_password" required/>
+            <span class="glyphicon glyphicon-remove form-control-feedback hidden"></span>
           </div>
+
 
           <div class="form-group">
             <label class="control-label" for="name">Name:</label>
@@ -37,8 +70,8 @@
             <label class="control-label" for="externalWebId">External WebID:</label>
             <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
             <span class="help-block">
-                                We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
-                            </span>
+                We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
+            </span>
           </div>
 
           
@@ -81,8 +114,11 @@
 
 </div>
 
+<script src="/common/js/owasp-password-strength-test.js" defer></script>
+<script src="/common/js/text-encoder-lite.min.js" defer></script>
+<script src="/common/js/solid.js" defer></script>
 
-
+/***
 <script src="/common/js/owasp-password-strength-test.js"
         defer></script>
 
@@ -144,4 +180,15 @@
         }
         return hexCodes.join("");
     }
+***/    
+
+<script>
+  var username = document.getElementById('username');
+  username.onkeyup = function() {
+  var list = document.getElementsByClassName('editable-username');
+  for (let item of list) {
+    item.innerHTML = username.value.toLowerCase()
+  }
+}
 </script>
+
