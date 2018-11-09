@@ -16,15 +16,22 @@
       <a onclick="login()" class="btn btn-success">Login</a>
     </div>
 
-    <h1>Welcome to the Solid Prototype</h1>
+    <h1>Solid-based Read-Write Data Space</h1>
   </div>
 
   <p class="lead">
-    This is a prototype implementation of a Solid server.
+  This  is a fully functional Read-Write Data Space provided by a the OpenLink Solid Server.
+  </p>
+  <p>
+Note: As a test and prototype server, there are no performance, security, or stability guarantees, bar the fact that the following are loosely-coupled:
 
-    It is a fully functional server, but there are no security or stability guarantees.
-
-    If you have not already done so, please create an account.
+<ol>
+<li> Identity - via a WebID </li>
+<li> Identification - via WebID-Profile Document (Card)</li>
+<li> Authentication - via TLS or OpenID Connect (OIDC) protocols</li>
+<li> Authorization - via WebACLs described using RDF sentences</li>
+<li> Storage - wherever you choose with this space as your default</li>
+</ol>
   </p>
 
   <p class="lead hidden" id="loggedIn">
