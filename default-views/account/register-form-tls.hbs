@@ -1,0 +1,60 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-body">
+
+        <form method="post" id="reg-form" action="/api/accounts/new">
+          {{> shared/error}}
+
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="alice" required />
+          </div>
+          <div class="row">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" name="name" id="name" value="{{name}}"/>
+          </div>
+          <div class="row">
+            <label for="externalWebId">WebID:</label>
+            <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
+          </div>
+
+          <input type="hidden" name="returnToUrl" value="{{returnToUrl}}" />
+          <input type="hidden" name="certificatePEM" id="certificatePEM" value="" />
+          <input type="hidden" name="certificatePKCS12" id="certificatePKCS12" value="" />
+
+          {{> auth/auth-hidden-fields}}
+        </form>
+
+{{> account/register-certdata}}
+
+      </div>
+    </div>
+
+  <div class="form-group">
+      <div class="col-md-2">
+        <button type="button" class="btn btn-primary" id="register">Register</button>
+      </div>
+  </div>
+
+<!-- end_col -->
+  </div>
+
+  <div class="col-md-6">
+    <div class="panel panel-default panel-already-registered">
+      <div class="panel-body">
+        <h2>Already have an account?</h2>
+        <p>
+          <a class="btn btn-lg btn-success" href="{{{loginUrl}}}">
+            Please Log In
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+{{> account/register-cert-popup}}
+
+</div>
+
+

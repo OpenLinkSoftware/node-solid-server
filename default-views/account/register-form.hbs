@@ -2,11 +2,11 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-body">
-        <form method="post" action="/api/accounts/new">
+        <form method="post" id="reg-form" action="/api/accounts/new">
           {{> shared/error}}
 
           <div class="form-group">
-            <label class="control-label" for="username">Username*</label>
+            <label class="control-label" for="username">Username:</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="alice"
                    required/>
 
@@ -35,7 +35,7 @@
 	  </div>
 
           <div class="form-group has-feedback">
-            <label class="control-label" for="password">Password*</label>
+            <label class="control-label" for="password">Password:</label>
             <input type="password" class="form-control control-progress" name="password" id="password" required/>
             <span class="glyphicon glyphicon-remove form-control-feedback hidden" aria-hidden="true"></span>
             <div class="progress">
@@ -53,19 +53,20 @@
 
 
           <div class="form-group">
-            <label class="control-label" for="name">Name*</label>
+            <label class="control-label" for="name">Name:</label>
             <input type="text" class="form-control" name="name" id="name" required/>
           </div>
 
           <div class="form-group">
-            <label class="control-label" for="email">Email*</label>
+            <label class="control-label" for="email">Email:</label>
             <input type="email" class="form-control" name="email" id="email"/>
             <span class="help-block">Your email will only used for account recovery</span>
           </div>
 
           <div class="form-group">
             <label class="control-label" for="externalWebId">External WebID:</label>
-            <input type="text" class="form-control" name="externalWebId" id="externalWebId"/>
+            <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
+            <button type="button" class="btn" id="detect_webid">Detect WebID</button>
             <span class="help-block">
                 We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
             </span>
@@ -82,16 +83,27 @@
             {{/if}}
           {{/if}}
 
-
-          <button type="submit" class="btn btn-primary" id="register">Register</button>
-
           <input type="hidden" name="returnToUrl" value="{{returnToUrl}}"/>
-          {{> auth/auth-hidden-fields}}
+          <input type="hidden" name="certificatePEM" id="certificatePEM" value="" />
+          <input type="hidden" name="certificatePKCS12" id="certificatePKCS12" value="" />
 
+          {{> auth/auth-hidden-fields}}
         </form>
+{{> account/register-certdata}}
+
       </div>
     </div>
+
+
+  <div class="form-group">
+      <div class="col-md-2">
+        <button type="button" class="btn btn-primary" id="register">Register</button>
+      </div>
   </div>
+
+<!-- end_col -->
+  </div>
+
 
   <div class="col-md-6">
     <div class="panel panel-default panel-already-registered">
@@ -105,19 +117,48 @@
       </div>
     </div>
   </div>
+
+{{> account/register-cert-popup}}
+
 </div>
 
 <script src="/common/js/owasp-password-strength-test.js" defer></script>
 <script src="/common/js/text-encoder-lite.min.js" defer></script>
 <script src="/common/js/solid.js" defer></script>
 
+
 <script>
   var username = document.getElementById('username');
   username.onkeyup = function() {
-  var list = document.getElementsByClassName('editable-username');
-  for (let item of list) {
-    item.innerHTML = username.value.toLowerCase()
+    var list = document.getElementsByClassName('editable-username');
+    for (let item of list) {
+      item.innerHTML = username.value.toLowerCase()
+    }
   }
-}
+
+  var button = document.getElementById('detect_webid');
+  button.addEventListener('click', function () {
+     fetch('/detect/webid',
+          { method: 'GET', 
+            headers: {
+              'Accept': 'application/json; charset=utf-8'
+            },
+            credentials: 'include'
+          })
+        .then(function(response) {
+          if (response.ok) {
+            response.json().then((val)=> {
+             var extWebid = document.getElementById('externalWebId');
+             var name = document.getElementById('name');
+
+             if (val.webid && val.webid.length > 1)
+               extWebid.value = val.webid;
+             if (val.name && val.name.length > 1 && name.value.length < 2)
+               name.value = val.name;
+            })
+          }
+        })
+  });
+
 </script>
 

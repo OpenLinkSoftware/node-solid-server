@@ -21,7 +21,7 @@ const mockUserStore = {
 
 const authMethod = 'oidc'
 const host = SolidHost.from({ serverUri: 'https://localhost:8443' })
-const accountManager = AccountManager.from({ host, authMethod })
+const accountManager = AccountManager.from({ host, authMethod, multiuser: true })
 const localAuth = { password: true, tls: true }
 
 describe('LoginRequest', () => {
@@ -165,10 +165,10 @@ describe('LoginRequest', () => {
 
   describe('postLoginUrl()', () => {
     it('should return the user account uri if no redirect_uri param', () => {
-      let request = new LoginRequest({ authQueryParams: {} })
+      let request = new LoginRequest({ authQueryParams: {}, accountManager })
 
-      let aliceAccount = 'https://alice.example.com'
-      let user = { accountUri: aliceAccount }
+      let aliceAccount = 'https://alice.localhost:8443'
+      let user = { username: 'alice', accountUri: aliceAccount }
 
       expect(request.postLoginUrl(user)).to.equal(aliceAccount)
     })

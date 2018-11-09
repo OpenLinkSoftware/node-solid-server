@@ -38,7 +38,7 @@
   "homepage": "https://github.com/solid/node-solid-server",
   "bugs": "https://github.com/solid/node-solid-server/issues",
   "dependencies": {
-    "@solid/oidc-auth-manager": "^0.17.1",
+    "@solid/oidc-auth-manager": "git+https://github.com/OpenLinkSoftware/oidc-auth-manager#openlink",
     "body-parser": "^1.18.3",
     "bootstrap": "^3.3.7",
     "busboy": "^0.2.12",
@@ -73,7 +73,7 @@
     "rdflib": "^0.17.1",
     "recursive-readdir": "^2.1.0",
     "rimraf": "^2.5.0",
-    "solid-auth-client": "^2.2.9",
+    "solid-auth-client": "git+https://github.com/OpenLinkSoftware/solid-auth-client.git#openlink",
     "solid-namespace": "^0.1.0",
     "solid-permissions": "^0.6.0",
     "solid-ws": "^0.2.3",
