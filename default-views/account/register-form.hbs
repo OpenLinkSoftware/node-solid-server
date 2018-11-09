@@ -66,6 +66,7 @@
           <div class="form-group">
             <label class="control-label" for="externalWebId">External WebID:</label>
             <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
+            <button type="button" class="btn" id="detect_webid">Detect WebID</button>
             <span class="help-block">
                 We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
             </span>
@@ -129,10 +130,35 @@
 <script>
   var username = document.getElementById('username');
   username.onkeyup = function() {
-  var list = document.getElementsByClassName('editable-username');
-  for (let item of list) {
-    item.innerHTML = username.value.toLowerCase()
+    var list = document.getElementsByClassName('editable-username');
+    for (let item of list) {
+      item.innerHTML = username.value.toLowerCase()
+    }
   }
-}
+
+  var button = document.getElementById('detect_webid');
+  button.addEventListener('click', function () {
+     fetch('/detect/webid',
+          { method: 'GET', 
+            headers: {
+              'Accept': 'application/json; charset=utf-8'
+            },
+            credentials: 'include'
+          })
+        .then(function(response) {
+          if (response.ok) {
+            response.json().then((val)=> {
+             var extWebid = document.getElementById('externalWebId');
+             var name = document.getElementById('name');
+
+             if (val.webid && val.webid.length > 1)
+               extWebid.value = val.webid;
+             if (val.name && val.name.length > 1 && name.value.length < 2)
+               name.value = val.name;
+            })
+          }
+        })
+  });
+
 </script>
 
