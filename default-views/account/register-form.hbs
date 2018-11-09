@@ -4,7 +4,7 @@
       <div class="panel-body">
         <form method="post" id="reg-form" action="/api/accounts/new">
           {{> shared/error}}
-        
+
           <div class="form-group">
             <label class="control-label" for="username">Username:</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="alice"
@@ -56,7 +56,7 @@
             <label class="control-label" for="name">Name:</label>
             <input type="text" class="form-control" name="name" id="name" required/>
           </div>
-          
+
           <div class="form-group">
             <label class="control-label" for="email">Email:</label>
             <input type="email" class="form-control" name="email" id="email"/>
@@ -71,7 +71,17 @@
             </span>
           </div>
 
-          
+          {{#if enforceToc}}
+            {{#if tocUri}}
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="acceptToc" value="true">
+                  I agree to the <a href="{{tocUri}}" target="_blank">Terms &amp; Conditions</a> of this service
+                </label>
+              </div>
+            {{/if}}
+          {{/if}}
+
           <input type="hidden" name="returnToUrl" value="{{returnToUrl}}"/>
           <input type="hidden" name="certificatePEM" id="certificatePEM" value="" />
           <input type="hidden" name="certificatePKCS12" id="certificatePKCS12" value="" />
