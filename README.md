@@ -225,13 +225,20 @@ Run with:
 docker run -p 8443:8443 --name solid node-solid-server
 ```
 
-Modify the config as follows:
+This will enable you to login to solid on https://localhost:8443 and then create a new account
+but not yet use that account. After a new account is made you will need to create an entry for 
+it in your local (/etc/)hosts file in line with the account and subdomain i.e. 
+
+127.0.0.1	newsoliduser.localhost
+
+Then you'll be able to use solid as intended.
+
+You can modify the config within the docker container as follows:
 
  - Copy the config to the current directory with: `docker cp solid:/usr/src/app/config.json .`
  - Edit the `config.json` file
  - Copy the file back with `docker cp config.json solid:/usr/src/app/`
  - Restart the server with `docker restart solid`
-
 
 ## Library Usage
 
@@ -381,6 +388,17 @@ By default Solid will not allow [certain usernames as they might cause
 confusion or allow vulnerabilies for social engineering](https://github.com/marteinn/The-Big-Username-Blacklist).
 This list is configurable via `config/usernames-blacklist.json`. Solid does not
 blacklist profanities by default.
+
+## Quota
+
+By default, a file `serverSide.ttl` will be installed to new PODs. Its
+current function is to set a quota for disk usage of just 25 MB, which
+is what we can be sure the current prototype can tolerate under
+load. This file is not writeable to users, but as server administrator
+you can remove it if you don't want to impose a quota. It is currently
+adviceable to remove it rather than set a large quota, because the
+current implementation will impair write performance if there is a lot
+of data.
 
 ## Contributing
 
