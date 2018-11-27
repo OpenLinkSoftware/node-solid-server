@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const validUrl = require('valid-url')
 const { URL } = require('url')
+const { isEmail } = require('validator')
 
 module.exports = [
   // {
@@ -355,6 +356,18 @@ module.exports = [
     prompt: true,
     validate: validUri,
     when: answers => answers.enforceToc
+  },
+  {
+    name: 'support-email',
+    help: 'The support email you provide for your users (not required)',
+    prompt: true,
+    validate: (value) => {
+      if (value && !isEmail(value)) {
+        return 'Must be a valid email'
+      }
+      return true
+    },
+    when: answers => answers.multiuser
   }
 ]
 

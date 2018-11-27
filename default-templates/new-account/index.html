@@ -25,12 +25,13 @@
       <div class="navbar-header">
         <a href="/" class="navbar-brand">Personal Data Space (POD)</a>
       </div>
-      <div class="navbar-right">
+      <div class="nav navbar-right navbar-form">
         <a id="logged-href" href="" title="" style="display:none">
           <span class="glyphicon glyphicon-user"></span>
         </a>
         <span>&nbsp&nbsp</span>
-        <button id="session-action" type="button" class="session-action btn btn-default navbar-btn">Loading...</button>
+        <button id="login"  type="button" class="hidden btn btn-default btn-success">Log in</button>
+        <button id="logout" type="button" class="hidden btn btn-danger">Log out</button>
       </div>
     </div>
   </nav>
@@ -404,18 +405,89 @@
 
 </body>
 <script src="/common/js/solid-auth-client.bundle.js"></script>
+<!--
+<script src="/common/js/auth-buttons.js"></script>
+-->
 <script type="text/javascript">
+
+(({ auth }) => {
+  // Wire up DOM elements
+  const [loginButton, logoutButton, registerButton, accountSettings] =
+    ['login', 'logout', 'register', 'accountSettings'].map(id =>
+      document.getElementById(id) || document.createElement('a'))
+  loginButton.addEventListener('click', login)
+  logoutButton.addEventListener('click', logout)
+  registerButton.addEventListener('click', register)
+
+  // Track authentication status and update UI
+  auth.trackSession(session => {
+    const loggedHref = document.getElementById('logged-href')
+    const loggedIn = !!session
+    const isOwner = loggedIn && new URL(session.webId).origin === location.origin
+    loginButton.classList.toggle('hidden', loggedIn)
+    logoutButton.classList.toggle('hidden', !loggedIn)
+    accountSettings.classList.toggle('hidden', !isOwner)
+    if (loggedIn) {
+      if (session.webId) {
+        loggedHref.style.display = 'initial'
+        loggedHref.href = session.webId
+        loggedHref.title = session.webId
+      }
+
+      document.getElementById('update_cert').disabled = false
+
+    } else {
+      loggedHref.style.display = 'none'
+      loggedHref.href = ''
+      loggedHref.title = ''
+      document.getElementById('update_cert').disabled = true
+    }
+
+  })
+
+  // Log the user in on the client and the server
+  async function login () {
+    const session = await auth.popupLogin()
+    if (session) {
+      // Make authenticated request to the server to establish a session cookie
+      const {status} = await auth.fetch(location, { method: 'HEAD' })
+      if (status === 401) {
+        alert(`Invalid login.\n\nDid you set ${session.idp} as your OIDC provider in your profile ${session.webId}?`)
+        await auth.logout()
+      }
+      // Now that we have a cookie, reload to display the authenticated page
+      location.reload()
+    }
+  }
+
+  // Log the user out from the client and the server
+  async function logout () {
+    await auth.logout()
+    location.reload()
+  }
+
+  // Redirect to the registration page
+  function register () {
+    const registration = new URL('/register', location)
+    registration.searchParams.set('returnToUrl', location)
+    location.href = registration
+  }
+})(solid)
+
 
 (function () {
     'use strict'
+/***
     var button = document.getElementById('session-action');
     var loggedIn = false;
     var accountSettings = document.getElementById('account-settings');
     var loggedHref = document.getElementById('logged-href')
+***/
     var certData = {};
     var certDays = 60;
     const webId = '{{webId}}';
 
+/***
     solid.auth.trackSession(function(session) {
       loggedIn = !!session;
       button.innerText = loggedIn ? 'Log out' : 'Log in';
@@ -431,7 +503,7 @@
           loggedHref.title = session.webId
         }
         document.getElementById('update_cert').disabled = false
-        /* fetch prefs.ttl for force receive connect.sid cookie */
+        // fetch prefs.ttl for force receive connect.sid cookie 
         solid.auth.fetch(location.origin + '/settings/prefs.ttl',
                    { credentials: 'include' })
 
@@ -460,7 +532,7 @@
       var uriParts = webId.split('/');
       return uriParts[0] + '//' + uriParts[2];
     }
-    
+***/    
 
     var init = window.location.hash === '#init';
     var update_delegator_profile = document.querySelector('#update_delegator_profile');
