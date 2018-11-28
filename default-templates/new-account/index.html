@@ -39,10 +39,6 @@
   <p class="lead">
     <span>
       This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
-      <div id="update_profile">
-        <button type="button" class="btn btn-primary" id="update_cert">Update Certificate</button>
-        <button type="button" class="btn btn-primary" id="create-csr">Create Cert. Signature Request</button>
-      </div>
     </span>
   </p>
 
@@ -96,9 +92,18 @@
     </div>
   </section>
 
-  <section class="hidden" id="account-settings">
+  <section class="hidden" id="accountSettings">
     <h1>Account settings</h1>
     <div class="list-group">
+<!--
+      <div id="update_profile" class="list-group-item">
+-->
+      <div class="list-group-item">
+        <button type="button" class="btn" id="update_cert">Update Certificate</button>
+      </div>
+      <div class="list-group-item">
+        <button type="button" class="btn" id="create-csr">Create Cert. Signature Request</button>
+      </div>
       <a href="/account/delete/" class="list-group-item">
         <span class="lead">Delete account</span>
       </a>
@@ -423,7 +428,7 @@
   auth.trackSession(session => {
     const loggedHref = document.getElementById('logged-href')
     const loggedIn = !!session
-    const isOwner = loggedIn && new URL(session.webId).origin === location.origin
+    const isOwner = loggedIn && getOriginFromWebId(session.webId) === location.origin
     loginButton.classList.toggle('hidden', loggedIn)
     logoutButton.classList.toggle('hidden', !loggedIn)
     accountSettings.classList.toggle('hidden', !isOwner)
@@ -472,58 +477,6 @@
     registration.searchParams.set('returnToUrl', location)
     location.href = registration
   }
-})(solid)
-
-
-(function () {
-    'use strict'
-/***
-    var button = document.getElementById('session-action');
-    var loggedIn = false;
-    var accountSettings = document.getElementById('account-settings');
-    var loggedHref = document.getElementById('logged-href')
-***/
-    var certData = {};
-    var certDays = 60;
-    const webId = '{{webId}}';
-
-/***
-    solid.auth.trackSession(function(session) {
-      loggedIn = !!session;
-      button.innerText = loggedIn ? 'Log out' : 'Log in';
-      button.classList.remove('btn-default');
-      button.classList.remove('btn-danger');
-      button.classList.remove('btn-primary');
-      button.classList.add(loggedIn ? 'btn-danger' : 'btn-primary')
-
-      if (loggedIn) {
-        if (session.webId) {
-          loggedHref.style.display = 'initial'
-          loggedHref.href = session.webId
-          loggedHref.title = session.webId
-        }
-        document.getElementById('update_cert').disabled = false
-        // fetch prefs.ttl for force receive connect.sid cookie 
-        solid.auth.fetch(location.origin + '/settings/prefs.ttl',
-                   { credentials: 'include' })
-
-        var sessionOrigin = getOriginFromWebId(session.webId);
-        var isOwner = sessionOrigin === location.origin;
-        accountSettings.classList.toggle('hidden', !isOwner);
-
-      } else {
-        loggedHref.style.display = 'none'
-        loggedHref.href = ''
-        loggedHref.title = ''
-        document.getElementById('update_cert').disabled = true
-      }
-    
-    })
-
-
-    button.addEventListener('click', function () {
-      loggedIn ? solid.auth.logout() : solid.auth.popupLogin();
-    });
 
     function getOriginFromWebId(webId) {
       if (window.URL.prototype) {
@@ -532,16 +485,21 @@
       var uriParts = webId.split('/');
       return uriParts[0] + '//' + uriParts[2];
     }
-***/    
+
+})(solid);
+
+
+(function () {
+    'use strict'
+    var certData = {};
+    var certDays = 60;
+    const webId = '{{webId}}';
+
 
     var init = window.location.hash === '#init';
     var update_delegator_profile = document.querySelector('#update_delegator_profile');
     if (update_delegator_profile) {
       update_delegator_profile.hidden = !init;
-    }
-    var update_profile = document.querySelector('#update_profile');
-    if (update_profile) {
-      update_profile.hidden = !init;
     }
   
     getCertDays();
