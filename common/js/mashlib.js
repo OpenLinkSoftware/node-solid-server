@@ -67325,7 +67325,6 @@ module.exports = `
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <link href="https://openlinksoftware.github.io/dokieli/media/css/basic.css" media="all" rel="stylesheet" title="Basic" />
     <link href="https://openlinksoftware.github.io/dokieli/media/css/do.css" media="all" rel="stylesheet" />
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="https://openlinksoftware.github.io/dokieli/scripts/do.js"></script>
   </head>
 
