@@ -26,7 +26,7 @@ module.exports = [
     prompt: true
   },
   {
-    name: 'serverUri',
+    name: 'server-uri',
     question: 'Solid server uri (with protocol, hostname and port)',
     help: "Solid server uri (default: 'https://localhost:8443')",
     default: 'https://localhost:8443',
@@ -84,13 +84,7 @@ module.exports = [
     }
   },
   {
-    name: 'certificate-header',
-    question: 'Accept client certificates through this HTTP header (for reverse proxies)',
-    default: '',
-    prompt: false
-  },
-  {
-    name: 'useOwner',
+    name: 'use-owner',
     question: 'Do you already have a WebID?',
     type: 'confirm',
     default: false,
@@ -154,7 +148,7 @@ module.exports = [
   //   help: 'URI to use as a default app for resources (default: https://linkeddata.github.io/warp/#/list/)'
   // },
   {
-    name: 'useCorsProxy',
+    name: 'use-cors-proxy',
     help: 'Do you want to have a CORS proxy endpoint?',
     flag: true,
     default: false,
@@ -166,7 +160,7 @@ module.exports = [
     prompt: false
   },
   {
-    name: 'corsProxy',
+    name: 'cors-proxy',
     help: 'Serve the CORS proxy on this path',
     when: function (answers) {
       return answers.useCorsProxy
@@ -175,7 +169,7 @@ module.exports = [
     prompt: true
   },
   {
-    name: 'authProxy',
+    name: 'auth-proxy',
     help: 'Object with path/server pairs to reverse proxy',
     default: {},
     prompt: false,
@@ -247,7 +241,7 @@ module.exports = [
     prompt: false
   },
   {
-    name: 'useEmail',
+    name: 'use-email',
     help: 'Do you want to set up an email service?',
     flag: true,
     prompt: true,
@@ -295,7 +289,7 @@ module.exports = [
     }
   },
   {
-    name: 'useApiApps',
+    name: 'use-api-apps',
     help: 'Do you want to load your default apps on /api/apps?',
     flag: true,
     prompt: false,
@@ -330,7 +324,7 @@ module.exports = [
     name: 'server-name',
     help: 'A name for your server (not required, but will be presented on your server\'s frontpage)',
     prompt: true,
-    default: answers => new URL(answers.serverUri).hostname
+    default: answers => new URL(answers['server-uri']).hostname
   },
   {
     name: 'server-description',
@@ -343,15 +337,15 @@ module.exports = [
     prompt: true
   },
   {
-    name: 'enforceToc',
+    name: 'enforce-toc',
     help: 'Do you want to enforce Terms & Conditions for your service?',
     flag: true,
     prompt: true,
-    default: true,
+    default: false,
     when: answers => answers.multiuser
   },
   {
-    name: 'tocUri',
+    name: 'toc-uri',
     help: 'URI to your Terms & Conditions',
     prompt: true,
     validate: validUri,
