@@ -9,6 +9,11 @@
   logoutButton.addEventListener('click', logout)
   registerButton.addEventListener('click', register)
 
+  const elements = {};
+  ['loggedIn', 'profileLink'].forEach(id => {
+    elements[id] = document.getElementById(id)
+  })
+
   // Track authentication status and update UI
   auth.trackSession(session => {
     const loggedIn = !!session
@@ -16,6 +21,14 @@
     loginButton.classList.toggle('hidden', loggedIn)
     logoutButton.classList.toggle('hidden', !loggedIn)
     accountSettings.classList.toggle('hidden', !isOwner)
+
+    if (elements.loggedIn)
+      elements.loggedIn.classList.toggle('hidden')
+
+    if (elements.profileLink && loggedIn) {
+      elements.profileLink.innerText = session.webId
+      elements.profileLink.href = session.webId
+    }
   })
 
   // Log the user in on the client and the server
