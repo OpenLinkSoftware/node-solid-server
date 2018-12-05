@@ -9,6 +9,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{webId}}>;
+
     # Optional owner email, to be used for account recovery:
     {{#if email}}acl:agent <mailto:{{{email}}}>;{{/if}}
 

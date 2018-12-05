@@ -10,6 +10,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{webId}}>;
+
     acl:accessTo </index.html>;
 
     acl:mode

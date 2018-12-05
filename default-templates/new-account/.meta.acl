@@ -13,6 +13,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{webId}}>;
+
     acl:accessTo </.meta>;
 
     acl:mode
