@@ -17,19 +17,21 @@
 	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
               document.write(window.location.host)
 	    </script></tt></p>
-	    <p>Your public Solid WebID will be:
+	    <p>Your public WebID will be:
 	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
               document.write(window.location.host)
 	    </script>/profile/card#me</tt></p>
 
-	    <p>Your <em>POD URL</em> is like the homepage for your Solid
-	    pod. By default, it is readable by the public, but you can
-	    always change that if you like by changing the access
-	    control.</p>
+            <p>Your <em>POD’s URL</em> identifies the homepage of your 
+            Solid-based Personal Data Space. By default, it is readable 
+            by the public, but 100% configurable by you i.e., you can 
+            choose to make it private or only accessible to groups of users 
+            via attribute-based access controls (data access policies).</p>
 
-	    <p>Your <em>Solid WebID</em> is your globally unique name
-	    that you can use to identify and authenticate yourself with
-	    other PODs across the world.</p>
+            <p>Your <em>WebID</em> is your globally unique name that you 
+            can use to identify and authenticate yourself across any 
+            HTTP-based network.</p>
+
 	    {{/if}}
 
 	  </div>
@@ -66,7 +68,7 @@
           <div class="form-group">
             <label class="control-label" for="externalWebId">External WebID:</label>
             <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
-            <button type="button" class="btn" id="detect_webid">Detect WebID</button>
+            <button type="button" class="btn btn-primary" id="detect_webid">Detect WebID</button>
             <span class="help-block">
                 We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
             </span>

@@ -34,10 +34,15 @@ Note: As a test and prototype server, there are no performance, security, or sta
 </ol>
   </p>
 
-  <p class="lead hidden" id="loggedIn">
-    You are logged in as
-    <a href="#" id="profileLink"></a>.
-  </p>
+  <div class="hidden" id="loggedIn">
+    <p class="lead">
+      You are logged in as
+      <a href="#" id="profileLink"></a>.
+    </p>
+    <p class="lead">
+      Your Public Homepage is <a href="#" id="homeLink"></a>.
+    </p>
+  </div>
 
   <section>
     {{#if serverLogo}}
