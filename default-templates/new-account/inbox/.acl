@@ -12,9 +12,10 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{accountUri}}>;
+
     acl:accessTo <./>;
     acl:default <./>;
-    acl:origin <{{webId}}>;
 
     acl:mode
         acl:Read, acl:Write, acl:Control.

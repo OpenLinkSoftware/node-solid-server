@@ -6,10 +6,10 @@
 <#owner>
     a acl:Authorization;
     acl:agent <{{webId}}>;
-    acl:origin <{{webId}}>;
 {{#if addOwlSameAs}}
     acl:agent <{{extWebId}}>;
 {{/if}}
+    acl:origin <{{accountUri}}>;
     acl:accessTo <./>;
     acl:default <./>;
     acl:mode acl:Read, acl:Write, acl:Control.

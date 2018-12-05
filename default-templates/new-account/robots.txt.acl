@@ -14,7 +14,7 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
-    acl:origin <{{webId}}>;
+    acl:origin <{{accountUri}}>;
 
     acl:accessTo </robots.txt>;
 

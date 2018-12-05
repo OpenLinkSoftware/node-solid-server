@@ -10,6 +10,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{accountUri}}>;
+
     acl:accessTo <./config.json>;
 
     acl:mode

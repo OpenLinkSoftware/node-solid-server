@@ -9,7 +9,8 @@
 {{#if addOwlSameAs}}
     acl:agent  <{{extWebId}}>;
 {{/if}}
-    acl:origin <{{webId}}>;
+
+    acl:origin <{{accountUri}}>;
 
     # Set the access to the root storage folder itself
     acl:accessTo <./>;

@@ -6,7 +6,11 @@
 
     acl:agent
         <{{webId}}>;
-    acl:origin <{{webId}}>;
+{{#if addOwlSameAs}}
+    acl:agent <{{extWebId}}>;
+{{/if}}
+
+    acl:origin <{{accountUri}}>;
 
     acl:accessTo <./serverSide.ttl>;
 

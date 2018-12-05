@@ -9,7 +9,7 @@
 {{#if addOwlSameAs}}
     acl:agent <{{extWebId}}>;
 {{/if}}
-    acl:origin <{{webId}}>;
+    acl:origin <{{accountUri}}>;
     acl:accessTo <./>;
     acl:defaultForNew <./>;
     acl:mode acl:Read, acl:Write, acl:Control.
