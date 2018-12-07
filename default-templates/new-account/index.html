@@ -94,7 +94,7 @@
     </div>
   </section>
 
-  <section class="hidden" id="accountSettings">
+  <section class="hidden" id="account-settings">
     <h1>Account settings</h1>
     <div class="list-group">
 <!--
@@ -420,7 +420,7 @@
 (({ auth }) => {
   // Wire up DOM elements
   const [loginButton, logoutButton, registerButton, accountSettings] =
-    ['login', 'logout', 'register', 'accountSettings'].map(id =>
+    ['login', 'logout', 'register', 'account-settings'].map(id =>
       document.getElementById(id) || document.createElement('a'))
   loginButton.addEventListener('click', login)
   logoutButton.addEventListener('click', logout)
