@@ -10,7 +10,6 @@
 
     acl:agentClass foaf:Agent;  # everyone
 
-    acl:accessTo <./>;
-    acl:defaultForNew <./>;
+    acl:accessTo </.well-known/>;
 
     acl:mode acl:Read.
