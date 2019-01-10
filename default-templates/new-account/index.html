@@ -499,7 +499,7 @@
     const webId = '{{webId}}';
 
 
-    var init = window.location.hash === '#init';
+    var init = (window.location.hash === '#admin' || window.location.hash === '#init');
     var update_delegator_profile = document.querySelector('#update_delegator_profile');
     if (update_delegator_profile) {
       update_delegator_profile.hidden = !init;
