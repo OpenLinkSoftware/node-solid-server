@@ -44,22 +44,6 @@
     </span>
   </p>
 
-{{#if tlsCertWebid}}
-  <section id="update_delegator_profile">
-    <div class="list-group">
-      <p class="lead">
-        If you want to make use of the WebID-TLS+Delegation authentication protocol, add the following RDF statement to your Delegate's WebID-Profile Document or click "Update Delegator WebID-Profile Doc" button to attempt this action right now, assuming you are logged in using a WebID that Read+Write privileges on the target WebID-Profile document.
-        <pre>
-&lt;{{tlsCertWebid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
-        </pre>
-        <span>
-          <input id="load_btn" class="btn btn-primary" value=" Update Delegator WebID-Profile Doc " type="button">
-        </span>
-      </p>
-    </div>  
-  </section>
-{{/if}}
-  
   <section>
     <h1>Data</h1>
     <div class="list-group">
@@ -88,9 +72,6 @@
       <a href="/common/plume/" target="_blank" class="list-group-item">
         <span class="lead">Plume blog</span>
       </a>
-      <a href="https://dokie.li/" target="_blank" class="list-group-item">
-        <span class="lead">Dokieli</span>
-      </a>
       <a href="https://github.com/solid/userguide" target="_blank" class="list-group-item">
         <span class="lead">Getting started with Solid and Data Browser</span>
       </a>
@@ -109,6 +90,19 @@
       <div class="list-group-item">
         <button type="button" class="btn" id="create-csr">Create Cert. Signature Request</button>
       </div>
+{{#if tlsCertWebid}}
+      <div class="list-group-item">
+        <p>
+          If you want to make use of the WebID-TLS+Delegation authentication protocol, add the following RDF statement to your Delegate's WebID-Profile Document or click "Update Delegator WebID-Profile Doc" button to attempt this action right now, assuming you are logged in using a WebID that Read+Write privileges on the target WebID-Profile document.
+          <pre>
+&lt;{{tlsCertWebid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
+          </pre>
+          <span>
+            <input id="load_btn" class="btn btn-primary" value=" Update Delegator WebID-Profile Doc " type="button">
+          </span>
+        </p>
+      </div>
+{{/if}}
       <a href="/account/delete/" class="list-group-item">
         <span class="lead">Delete account</span>
       </a>
@@ -500,13 +494,6 @@
     var certDays = 60;
     const webId = '{{webId}}';
 
-
-    var init = (window.location.hash === '#admin' || window.location.hash === '#init');
-    var update_delegator_profile = document.querySelector('#update_delegator_profile');
-    if (update_delegator_profile) {
-      update_delegator_profile.hidden = !init;
-    }
-  
     getCertDays();
   
     var btnLoad = document.getElementById('load_btn');
@@ -817,7 +804,7 @@
      cert.serialNumber = (Date.now()).toString(16);
 
      cert.validity.notBefore = new Date();
-     cert.validity.notAfter = addDays(new Date(), 60);
+     cert.validity.notAfter = addDays(new Date(), certDays);
 //   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
 
      var attrs = [];
