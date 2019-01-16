@@ -41,7 +41,7 @@
       This is a public homepage of <a href="{{webId}}">{{#if name}} {{name}} {{/if}}</a>
     </span>
   </p>
-
+<!--
 {{#if tlsCertWebid}}
   <section id="update_delegator_profile">
     <div class="list-group">
@@ -57,7 +57,8 @@
     </div>  
   </section>
 {{/if}}
-  
+-->  
+
   <section>
     <h1>Data</h1>
     <div class="list-group">
@@ -76,6 +77,9 @@
       <a href="/private/" target="_blank" class="list-group-item">
         <span class="lead">Private Folder</span>
         <span class="badge">private</span>
+      </a>
+      <a href="/account/password/reset" class="list-group-item">
+        <span class="lead">Reset Password</span>
       </a>
     </div>
   </section>
@@ -107,6 +111,19 @@
       <div class="list-group-item">
         <button type="button" class="btn" id="create-csr">Create Cert. Signature Request</button>
       </div>
+{{#if tlsCertWebid}}
+      <div class="list-group-item">
+        <p>
+          If you want to make use of the WebID-TLS+Delegation authentication protocol, add the following RDF statement to your Delegate's WebID-Profile Document or click "Update Delegator WebID-Profile Doc" button to attempt this action right now, assuming you are logged in using a WebID that Read+Write privileges on the target WebID-Profile document.
+          <pre>
+&lt;{{tlsCertWebid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
+          </pre>
+          <span>
+            <input id="load_btn" class="btn btn-primary" value=" Update Delegator WebID-Profile Doc " type="button">
+          </span>
+        </p>
+      </div>
+{{/if}}
       <a href="/account/delete/" class="list-group-item">
         <span class="lead">Delete account</span>
       </a>
