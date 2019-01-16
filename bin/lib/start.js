@@ -42,13 +42,22 @@ module.exports = function (program, server) {
 
 function bin (argv, server) {
   if (!argv.email) {
-    argv.email = {
-      host: argv['emailHost'],
-      port: argv['emailPort'],
-      secure: true,
-      auth: {
-        user: argv['emailAuthUser'],
-        pass: argv['emailAuthPass']
+    let user = argv['emailAuthUser']
+    if (user) {
+      argv.email = {
+        host: argv['emailHost'],
+        port: argv['emailPort'],
+        secure: true,
+        auth: {
+          user: argv['emailAuthUser'],
+          pass: argv['emailAuthPass']
+        }
+      }
+    } else {
+      argv.email = {
+        host: argv['emailHost'],
+        port: argv['emailPort'],
+        secure: true,
       }
     }
     delete argv['emailHost']
