@@ -1,7 +1,7 @@
 {
   "name": "solid-server",
   "description": "Solid server on top of the file-system",
-  "version": "5.0.0-beta.4",
+  "version": "5.0.0-beta.5",
   "author": {
     "name": "Tim Berners-Lee",
     "email": "timbl@w3.org"
@@ -28,6 +28,11 @@
       "name": "Kjetil Kjernsmo",
       "email": "kjetil@inrupt.com",
       "url": "http://kjetil.kjernsmo.net/"
+    },
+    {
+      "name": "Arne Hassel",
+      "email": "arne.hassel@inrupt.com",
+      "url": "https://icanhasweb.net/"
     }
   ],
   "license": "MIT",
