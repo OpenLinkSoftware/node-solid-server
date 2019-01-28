@@ -44,6 +44,22 @@
     </span>
   </p>
 
+{{#if tlsCertWebid}}
+  <section id="update_delegator_profile" class="hidden">
+    <div class="list-group">
+      <p class="lead">
+        If you want to make use of the WebID-TLS+Delegation authentication protocol, add the following RDF statement to your Delegate's WebID-Profile Document or click "Update Delegator WebID-Profile Doc" button to attempt this action right now, assuming you are logged in using a WebID that Read+Write privileges on the target WebID-Profile document.
+        <pre>
+&lt;{{tlsCertWebid}}&gt; &lt;http://www.openlinksw.com/schemas/cert#onBehalfOf&gt; &lt;{{webId}}&gt; .
+        </pre>
+        <span>
+          <input id="load_btn" class="btn btn-primary" value=" Update Delegator WebID-Profile Doc " type="button">
+        </span>
+      </p>
+    </div>  
+  </section>
+{{/if}}
+  
   <section>
     <h1>Data</h1>
     <div class="list-group">
@@ -88,10 +104,10 @@
       <div id="update_profile" class="list-group-item">
 -->
       <div class="list-group-item">
-        <button type="button" class="btn" id="update_cert">Update Certificate</button>
+        <button type="button" class="btn" id="update_cert">Update Credentials Document</button>
       </div>
       <div class="list-group-item">
-        <button type="button" class="btn" id="create-csr">Create Cert. Signature Request</button>
+        <button type="button" class="btn" id="create-csr">Generate Credentials Signature Request</button>
       </div>
 {{#if tlsCertWebid}}
       <div class="list-group-item">
@@ -428,6 +444,7 @@
 
   // Track authentication status and update UI
   auth.trackSession(session => {
+    const update_delegator_profile = document.getElementById('update_delegator_profile')
     const loggedHref = document.getElementById('logged-href')
     const loggedIn = !!session
     const isOwner = loggedIn && getOriginFromWebId(session.webId) === location.origin
@@ -436,18 +453,26 @@
     accountSettings.classList.toggle('hidden', !isOwner)
     if (loggedIn) {
       if (session.webId) {
-        loggedHref.style.display = 'initial'
+        loggedHref.classList.remove('hidden')
         loggedHref.href = session.webId
         loggedHref.title = session.webId
       }
 
       document.getElementById('update_cert').disabled = false
+      if (update_delegator_profile) {
+        update_delegator_profile.classList.add('hidden')
+      }
 
     } else {
-      loggedHref.style.display = 'none'
+      loggedHref.classList.add('hidden')
       loggedHref.href = ''
       loggedHref.title = ''
       document.getElementById('update_cert').disabled = true
+
+      if (update_delegator_profile) {
+        var init = (window.location.hash === '#init' || window.location.hash === '#admin');
+        update_delegator_profile.classList.toggle('hidden', !init)
+      }
     }
 
   })
@@ -497,6 +522,12 @@
     var certDays = 60;
     const webId = '{{webId}}';
 
+    var init = (window.location.hash === '#init' || window.location.hash === '#admin');
+    var update_delegator_profile = document.querySelector('#update_delegator_profile');
+    if (update_delegator_profile) {
+       update_delegator_profile.classList.toggle('hidden', !init)
+    }
+    
     getCertDays();
   
     var btnLoad = document.getElementById('load_btn');
