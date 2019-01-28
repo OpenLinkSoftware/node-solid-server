@@ -2,12 +2,13 @@
 
 (({ auth }) => {
   // Wire up DOM elements
-  const [loginButton, logoutButton, registerButton, accountSettings] =
-    ['login', 'logout', 'register', 'accountSettings'].map(id =>
+  const [loginButton, logoutButton, registerButton, accountSettings, registerServerButton] =
+    ['login', 'logout', 'register', 'accountSettings', 'register-server'].map(id =>
       document.getElementById(id) || document.createElement('a'))
   loginButton.addEventListener('click', login)
   logoutButton.addEventListener('click', logout)
   registerButton.addEventListener('click', register)
+  registerServerButton.addEventListener('click', register_server)
 
   const elements = {};
   ['loggedIn', 'profileLink', 'homeLink'].forEach(id => {
@@ -20,6 +21,8 @@
     const isOwner = loggedIn && new URL(session.webId).origin === location.origin
     loginButton.classList.toggle('hidden', loggedIn)
     logoutButton.classList.toggle('hidden', !loggedIn)
+    registerButton.classList.toggle('hidden', loggedIn)
+    registerServerButton.classList.toggle('hidden', loggedIn)
     accountSettings.classList.toggle('hidden', !isOwner)
 
     if (elements.loggedIn)
@@ -61,6 +64,12 @@
   function register () {
     const registration = new URL('/register', location)
     registration.searchParams.set('returnToUrl', location)
+    location.href = registration
+  }
+
+  // Redirect to the registration page
+  function register_server () {
+    const registration = new URL('/register', location)
     location.href = registration
   }
 })(solid)
