@@ -27,10 +27,10 @@
 
     ldp:inbox </inbox/> ;
 
-    solid:trustedApp
+    acl:trustedApp
             [
-                n1:mode n1:Append, n1:Control, n1:Read, n1:Write;
-                n1:origin
+                acl:mode acl:Append, acl:Control, acl:Read, acl:Write;
+                acl:origin
 # Chrome OSDS extension
                     <chrome-extension://egdaiaihbdoiibopledjahjaihbmjhdj>,
 # Chrome YouID extension
