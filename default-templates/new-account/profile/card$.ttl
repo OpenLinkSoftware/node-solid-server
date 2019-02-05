@@ -27,6 +27,24 @@
 
     ldp:inbox </inbox/> ;
 
+    solid:trustedApp
+            [
+                n1:mode n1:Append, n1:Control, n1:Read, n1:Write;
+                n1:origin
+# Chrome OSDS extension
+                    <chrome-extension://egdaiaihbdoiibopledjahjaihbmjhdj>,
+# Chrome YouID extension
+                    <chrome-extension://kbepkemknbihgdmdnfainhmiidoblhee>,
+# FF OSDS extension
+                    <moz-extension://ff595886-a5ae-421d-ae03-e320cd2ddaa7>,
+# FF YouID extension
+                    <moz-extension://2405fd01-a1c6-4aed-ae5d-fd02a0a18913>,
+# Chrome Dokieli extension
+                    <chrome-extension://ddmhaonbhodhgkaljpjlglodncddalid>,
+# Markbook app
+                    <https://markbook.org>, <https://ods-qa.openlinksw.com>
+            ];
+
     pim:preferencesFile </settings/prefs.ttl> ;  # private settings/preferences
     solid:publicTypeIndex </settings/publicTypeIndex.ttl> ;
     solid:privateTypeIndex </settings/privateTypeIndex.ttl> .
