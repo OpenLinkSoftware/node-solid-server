@@ -88,7 +88,7 @@
     "webid": "^0.3.11"
   },
   "devDependencies": {
-    "@solid/oidc-op": "^0.4.0",
+    "@solid/oidc-op": "git+https://github.com/OpenLinkSoftware/oidc-op#openlink",
     "@solid/solid-auth-oidc": "^0.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
