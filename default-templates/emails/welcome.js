@@ -19,20 +19,16 @@ function render (data) {
     /**
      * Text version of the Welcome email
      */
-    text: `Welcome to Solid!
+    text: `Welcome to the OpenLink Node Solid Server for exploiting the Read-Write functionality offered by the Solid Platform!
 
-Your account has been created.
-
-Your Web Id: ${data.webid}`,
+A new Profile Document has been created for your WebID: ${data.webid}`,
 
     /**
      * HTML version of the Welcome email
      */
-    html: `<p>Welcome to Solid!</p>
+    html: `<p>Welcome to the OpenLink Node Solid Server for exploiting the Read-Write functionality offered by the Solid Platform!</p>
 
-<p>Your account has been created.</p>
-
-<p>Your Web Id: ${data.webid}</p>`
+<p>A new Profile Document has been created for your WebID: ${data.webid}</p>`
   }
 }
 
