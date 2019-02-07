@@ -5,7 +5,7 @@
 - Node versions greater than 8 are supported.
 - Changes to vocabulary use:
     - `solid:inbox` is deprecated in favour of `ldp:inbox`.
-    - `acl:defaultForNew` is deprecated in favour of `ack:default`.
+    - `acl:defaultForNew` is deprecated in favour of `acl:default`.
 - Terms of Service may be added and enforced for new registrations,
   but is disabled by default.    	
 - DELETE operations on a resource now require that the user has write permissions on
@@ -23,6 +23,8 @@
       to applications for added security.
 - Logging is now verbose by default so the `-v` option has been
   removed and a `--quiet` option has been added to mute the log.
+- To be bug compliant with 4.x releases, if a rule for public readable
+  root / does not exist, it will check in /index.html.acl (see issue #1063)
 - Command line options are now kebab-cased rather than camelCased,
   config options may be both.
 - Many smaller fixes.
@@ -49,6 +51,13 @@
     which makes the content-type automatically detectable.
     This fixes many of the old Content-Type-related bugs.
     _More information: https://www.w3.org/DesignIssues/HTTPFilenameMapping.html_
+
+## 4.4.0
+
+- Introduce a quota system. Delete the /settings/serverSide.ttl in the
+  user's POD to disable, or edit to fit your resource constraints.
+
+#### Changelog is incomplete for much of the 4.x series
 
 ## 4.1.0
 
