@@ -1,23 +1,36 @@
 {
   "name": "solid-server",
   "description": "Solid server on top of the file-system",
-  "version": "4.4.0",
+  "version": "4.4.2",
   "author": {
     "name": "Tim Berners-Lee",
     "email": "timbl@w3.org"
   },
   "contributors": [
     {
-      "name": "Martin Martinez Rivera",
-      "email": "martinmr@mit.edu"
+      "name": "Arne Hassel",
+      "url": "http://icanhasweb.net/"
     },
     {
       "name": "Nicola Greco",
       "email": "me@nicolagreco.com"
     },
     {
-      "name": "Dmitri Zagidulin",
-      "url": "https://github.com/dmitrizagidulin/"
+      "name": "Kjetil Kjernsmo",
+      "email": "kjetil@inrupt.com",
+      "url": "http://kjetil.kjernsmo.net/"
+    },
+    {
+      "name": "Martin Martinez Rivera",
+      "email": "martinmr@mit.edu"
+    },
+    {
+      "name": "Andrei Sambra",
+      "url": "https://deiu.me/"
+    },
+    {
+      "name": "Ruben Taelman",
+      "url": "https://www.rubensworks.net/"
     },
     {
       "name": "Ruben Verborgh",
@@ -25,9 +38,8 @@
       "url": "https://ruben.verborgh.org/"
     },
     {
-      "name": "Kjetil Kjernsmo",
-      "email": "kjetil@inrupt.com",
-      "url": "http://kjetil.kjernsmo.net/"
+      "name": "Dmitri Zagidulin",
+      "url": "https://github.com/dmitrizagidulin/"
     }
   ],
   "license": "MIT",
@@ -57,7 +69,7 @@
     "get-folder-size": "^2.0.0",
     "glob": "^7.1.1",
     "global-tunnel-ng": "^2.1.0",
-    "handlebars": "^4.0.6",
+    "handlebars": "^4.0.13",
     "http-proxy-middleware": "^0.18.0",
     "inquirer": "^1.0.2",
     "ip-range-check": "0.0.2",
@@ -81,6 +93,7 @@
     "text-encoder-lite": "^1.0.1",
     "the-big-username-blacklist": "^1.5.1",
     "ulid": "^0.1.0",
+    "urijs": "^1.19.1",
     "uuid": "^3.0.0",
     "valid-url": "^1.0.9",
     "validator": "^10.9.0",
@@ -92,27 +105,30 @@
     "@solid/solid-auth-oidc": "^0.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "cross-env": "^5.2.0",
     "dirty-chai": "^1.2.2",
     "localstorage-memory": "^1.0.2",
     "mocha": "^5.1.1",
     "nock": "^9.0.14",
     "node-mocks-http": "^1.7.0",
-    "nyc": "^13.0.1",
+    "nyc": "^13.3.0",
+    "randombytes": "^2.0.1",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.8.0",
-    "snyk": "^1.88.2",
+    "snyk": "^1.136.1",
     "standard": "^8.6.0",
     "supertest": "^3.0.0",
-    "whatwg-url": "^6.1.0",
-    "randombytes": "^2.0.1"
+    "turtle-validator": "^1.0.2",
+    "whatwg-url": "^6.1.0"
   },
   "main": "index.js",
   "scripts": {
     "solid": "node ./bin/solid",
     "standard": "standard '{bin,examples,lib,test}/**/*.js'",
-    "nyc": "NODE_TLS_REJECT_UNAUTHORIZED=0 nyc --reporter=text-summary mocha",
-    "mocha": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha",
-    "test": "npm run standard && npm run nyc",
+    "validate": "node ./test/validate-turtle.js",
+    "nyc": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 nyc --reporter=text-summary mocha",
+    "mocha": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 mocha",
+    "test": "npm run standard && npm run validate && npm run nyc",
     "clean": "rimraf config/templates config/views"
   },
   "nyc": {
