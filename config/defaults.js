@@ -13,7 +13,7 @@ module.exports = {
   'webid': true,
   'certDays': 60,
   'strictOrigin': true,
-  'trustedOrigins': ['https://apps.solid.invalid'],
+  'trustedOrigins': [],
   'dataBrowserPath': 'default'
 //  'dataBrowserPath': 'https://linkeddata.uriburner.com/describe/?url={url}&sponger:get=add'
 
