@@ -1,0 +1,73 @@
+@prefix solid: <http://www.w3.org/ns/solid/terms#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix pim: <http://www.w3.org/ns/pim/space#>.
+@prefix schema: <http://schema.org/>.
+@prefix ldp: <http://www.w3.org/ns/ldp#>.
+@prefix acl: <http://www.w3.org/ns/auth/acl#> . 
+@prefix owl: <http://www.w3.org/2002/07/owl#> . 
+@prefix cert: <http://www.w3.org/ns/auth/cert#> . 
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . 
+@prefix : <#> .
+
+<>
+    a foaf:PersonalProfileDocument ;
+    foaf:maker <{{webId}}> ;
+    foaf:primaryTopic <{{webId}}> .
+
+<{{webId}}>
+    a foaf:Person ;
+    a schema:Person ;
+
+    foaf:name "{{name}}" ;
+
+    solid:oidcIssuer <{{serverUri}}> ;
+
+    solid:account </> ;  # link to the account uri
+    pim:storage </> ;    # root storage
+
+    ldp:inbox </inbox/> ;
+
+    acl:trustedApp
+            [
+                acl:mode acl:Append, acl:Control, acl:Read, acl:Write;
+                acl:origin
+# Chrome OSDS extension
+                    <chrome-extension://egdaiaihbdoiibopledjahjaihbmjhdj>,
+# Chrome YouID extension
+                    <chrome-extension://kbepkemknbihgdmdnfainhmiidoblhee>,
+# FF OSDS extension
+                    <moz-extension://ff595886-a5ae-421d-ae03-e320cd2ddaa7>,
+# FF YouID extension
+                    <moz-extension://2405fd01-a1c6-4aed-ae5d-fd02a0a18913>,
+# Chrome Dokieli extension
+                    <chrome-extension://ddmhaonbhodhgkaljpjlglodncddalid>,
+# Markbook app
+                    <https://markbook.org>, <https://ods-qa.openlinksw.com>
+            ];
+
+    pim:preferencesFile </settings/prefs.ttl> ;  # private settings/preferences
+    solid:publicTypeIndex </settings/publicTypeIndex.ttl> ;
+    solid:privateTypeIndex </settings/privateTypeIndex.ttl> .
+
+{{#if addOwlSameAs}}
+<{{webId}}>
+    owl:sameAs <{{extWebId}}> .
+{{/if}}
+
+{{#if tlsCertWebid}}
+<{{webId}}>
+    acl:delegates <{{tlsCertWebid}}> ; # Delegation Relations for Software Agent 
+    cert:key :key-stub .
+
+:key-stub    
+    a cert:RSAPublicKey ;
+    cert:exponent   "65537"^^xsd:int ;
+    cert:modulus    "00"^^xsd:hexBinary .
+
+<{{tlsCertWebid}}>
+    cert:key [
+               a cert:RSAPublicKey ;
+               cert:exponent   "{{tlsCertExponent}}"^^xsd:int ;
+               cert:modulus    "{{tlsCertModulus}}"^^xsd:hexBinary
+             ] .
+{{/if}}

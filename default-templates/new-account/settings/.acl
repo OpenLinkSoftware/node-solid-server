@@ -10,11 +10,13 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{accountUri}}>;
+
     # Set the access to the root storage folder itself
     acl:accessTo <./>;
 
     # All settings resources will be private, by default, unless overridden
-    acl:defaultForNew <./>;
+    acl:default <./>;
 
     # The owner has all of the access modes allowed
     acl:mode

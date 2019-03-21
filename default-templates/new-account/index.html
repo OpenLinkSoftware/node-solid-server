@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Set content in the next line to false if you do not want your homepage to be automatically updated whenever a new version becomes available. -->
+  <meta name="solid-allow-automatic-updates" content="true">
   <title>Personal Data Space (or POD) {{#if name}} of {{name}} {{/if}}</title>
   <link rel="stylesheet" href="/common/css/bootstrap.min.css">
   <link rel="stylesheet" href="/common/css/solid.css">
@@ -11,11 +13,35 @@
     .session-action {
       margin-right: 15px;
     }
+
+
+    .dettable {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      border: solid #ccc 1px;
+      -moz-border-radius: 6px;
+      -webkit-border-radius: 6px;
+      border-radius: 6px;
+      font-family: 'trebuchet MS' , 'Lucida sans' , Arial;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .dettable > tbody > tr > td, .dettable > thead > tr > th {
+      border-left: 1px solid #ccc;
+      border-top: 1px solid #ccc;
+      padding: 4px;
+      text-align: left;
+    }
+
   </style>
 
   <script src="common/js/jquery.min.js"></script>
   <script src="common/js/bootstrap.min.js"></script>
   <script src="common/js/forge.min.js"></script>
+  <script src="common/js/rdfstore_min.js"></script>
+  <script src="common/js/webid_loader.js"></script>
 
 </head>
 <body>
@@ -77,9 +103,6 @@
         <span class="lead">Private Folder</span>
         <span class="badge">private</span>
       </a>
-      <a href="/account/password/reset" class="list-group-item">
-        <span class="lead">Reset Password</span>
-      </a>
     </div>
   </section>
   
@@ -89,23 +112,23 @@
       <a href="/common/plume/" target="_blank" class="list-group-item">
         <span class="lead">Plume blog</span>
       </a>
-      <a href="https://dokie.li/" target="_blank" class="list-group-item">
-        <span class="lead">Dokieli</span>
-      </a>
       <a href="https://github.com/solid/userguide" target="_blank" class="list-group-item">
         <span class="lead">Getting started with Solid and Data Browser</span>
+      </a>
+      <a href="/account/password/reset" class="list-group-item">
+        <span class="lead">Reset Password</span>
       </a>
     </div>
   </section>
 
-  <section class="hidden" id="accountSettings">
+  <section class="hidden" id="account-settings">
     <h1>Account settings</h1>
     <div class="list-group">
 <!--
       <div id="update_profile" class="list-group-item">
 -->
       <div class="list-group-item">
-        <button type="button" class="btn" id="update_cert">Update Credentials Document</button>
+        <button type="button" class="btn" id="create_cert">Update Credentials Document</button>
       </div>
       <div class="list-group-item">
         <button type="button" class="btn" id="create-csr">Generate Credentials Signature Request</button>
@@ -129,9 +152,8 @@
     </div>
   </section>
   
-<!-- Modal -->
 <div class="modal fade" id="certModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:500px" role="document">
+  <div class="modal-dialog" style="width:600px" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -143,20 +165,20 @@
       
         <div class="accordion" id="accordion-cert">
           <div class="card">
-            <div class="card-header" id="headingOne">
+            <div class="card-header" id="heading1">
               <h5 class="mb-0">
-                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
                   Create Self-Signed Certificate
                 </button>
               </h5>
             </div>
         
-            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion-cert">
+            <div id="collapse1" class="collapse" aria-labelledby="heading1" data-parent="#accordion-cert">
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-12">
                     <label for="cert_name">Name:</label>
-                    <input type="text" class="form-control" id="cert_name" value="{{name}}" />
+                    <input type="text" class="form-control" id="cert_name" value="smalinin" />
                   </div>
                   <div class="col-md-12">&nbsp;</div>
                 </div>
@@ -191,14 +213,18 @@
                 <div class="row">
                   <div class="col-md-12">
                     <label for="cert_State">State:</label>
-                    <input type="text" class="form-control" id="cert_State" />
+                    <input type="text" list="c_states" class="form-control" id="cert_State" />
+                    <datalist id="c_states">
+                    </datalist>
                   </div>
                   <div class="col-md-12">&nbsp;</div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-12">
                     <label for="cert_Country">Country:</label>
-                    <input type="text" class="form-control" id="cert_Country" />
+                      <select class="form-control" id="cert_Country">
+                        <option value="" ></option>
+                      </select>
                   </div>
                   <div class="col-md-12">&nbsp;</div>
                 </div>
@@ -232,14 +258,14 @@
           </div>
 
           <div class="card">
-            <div class="card-header" id="headingTwo">
+            <div class="card-header" id="heading2">
               <h5 class="mb-0">
-                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                  Upload existed certificate
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                  Upload existing certificate
                 </button>
               </h5>
             </div>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion-cert">
+            <div id="collapse2" class="collapse" aria-labelledby="heading2" data-parent="#accordion-cert">
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-12">
@@ -262,6 +288,67 @@
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-header" id="heading3">
+              <h5 class="mb-0">
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse3" title="Setting up Delegate Relations for WebID-TLS+Delegation authentication protocol usage">
+                  Setup Delegate(s)
+                </button>
+              </h5>
+            </div>
+            <div id="collapse3" class="collapse" aria-labelledby="heading3" data-parent="#accordion-cert">
+              <div class="card-body">
+<!-- ==================================== -->
+                <form id="delegate-create" class="form-horizontal">
+                  <div class="form-group row">
+                    <label for="delegate_uri" class="col-md-2 control-label">Delegate&nbsp;URI:</label>
+                    <div class="col-md-10">
+                      <input type="text" class="form-control" id="delegate_uri" value="">
+                      <button id="btn-delegate_uri" type="button" class="btn">
+                        <img class="hidden" id="delegate_wait" src="common/css/throbber.gif" width="16" />
+                        Fetch Profile 
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <div class="col-md-12">
+                      <button id="btn-delegate_cert_key" style="text-align:left" class="btn col-md-12" type="button">Certificate Key<span class="caret pull-right" style="margin-top:10px"></span></button>
+                    </div> 
+        
+                    <div class="col-md-12">
+                      <label for="delegate-text" class="control-label">Relations for uploading to Delegate profile:</label>
+                      <textarea id="delegate-text" class="form-control hidden1" style="width: 570px; height: 130px; overflow:scroll; white-space:nowrap;">
+                      </textarea>
+                      <button id="btn-update_delegate" type="button" class="btn btn-primary ">
+                        Update Delegate Profile 
+                      </button>
+        
+                    </div>
+                  </div>
+        
+                  <div class="form-group row">
+                    <div class="col-md-12">
+                      <label for="delegator-text" class="control-label">Relations for uploading to Delegator profile:</label>
+                      <textarea id="delegator-text" class="form-control hidden1" style="width: 570px; height: 170px; overflow:scroll; white-space:nowrap;">
+                      </textarea>
+                      <button id="btn-update_delegator" type="button" class="btn btn-primary ">
+                        Update Delegator Profile 
+                      </button>
+                    </div>
+                  </div>
+                </form>
+        
+                <div id="u_wait" class="hidden">
+                 <img src="common/css/throbber.gif" width="16" /> Wait...
+                 <div id="u_msg"></div>
+                </div>
+        
+<!-- ==================================== -->
+              </div>
+            </div>
+          </div>
+
         </div>
         
       </div>
@@ -272,8 +359,8 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="certReadyModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:400px" role="document">
+<div class="modal fade" id="certReadyModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" style="width:600px" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -291,16 +378,41 @@
            <br/>
            <h5>Please save PKCS12 Credentials Store on local disk and click Register.</h5>
         </section>
-        </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button id="upload_cert" type="button" class="btn btn-primary">Register</button>
+        <button id="btn-upload_cert" type="button" class="btn btn-primary">Register</button>
       </div>
     </div>
   </div>
 </div>
 
+
+<!-- Modal -->
+<div class="modal" id="cert-key-dlg" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" style="width:700px" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h5 class="modal-title">Choose Certificate Key</h5>
+      </div>
+      <div class="modal-body">
+        <div style="height:500px; overflow: auto;">
+          <table id="cert-key-tbl" class="dettable">
+            <tbody id="keys_data">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id="btn-ok" type="button" class="btn btn-primary">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="csrModal" tabindex="-1" role="dialog" aria-labelledby="certModalLabel" aria-hidden="true">
@@ -352,14 +464,18 @@
         <div class="row">
           <div class="col-md-12">
             <label for="csr_State">State:</label>
-            <input type="text" class="form-control" id="csr_State" />
+            <input type="text" list="csr_states" class="form-control" id="csr_State" />
+            <datalist id="csr_states">
+            </datalist>
           </div>
           <div class="col-md-12">&nbsp;</div>
         </div>
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-12">
             <label for="csr_Country">Country:</label>
-            <input type="text" class="form-control" id="csr_Country" />
+            <select class="form-control" id="csr_Country">
+              <option value="" ></option>
+            </select>
           </div>
           <div class="col-md-12">&nbsp;</div>
         </div>
@@ -437,7 +553,7 @@
 (({ auth }) => {
   // Wire up DOM elements
   const [loginButton, logoutButton, registerButton, accountSettings] =
-    ['login', 'logout', 'register', 'accountSettings'].map(id =>
+    ['login', 'logout', 'register', 'account-settings'].map(id =>
       document.getElementById(id) || document.createElement('a'))
   loginButton.addEventListener('click', login)
   logoutButton.addEventListener('click', logout)
@@ -459,7 +575,7 @@
         loggedHref.title = session.webId
       }
 
-      document.getElementById('update_cert').disabled = false
+      document.getElementById('create_cert').disabled = false
       if (update_delegator_profile) {
         update_delegator_profile.classList.add('hidden')
       }
@@ -468,7 +584,7 @@
       loggedHref.classList.add('hidden')
       loggedHref.href = ''
       loggedHref.title = ''
-      document.getElementById('update_cert').disabled = true
+      document.getElementById('create_cert').disabled = true
 
       if (update_delegator_profile) {
         var init = (window.location.hash === '#init' || window.location.hash === '#admin');
@@ -519,51 +635,141 @@
 
 (function () {
     'use strict'
-    var certData = {};
-    var certDays = 60;
-    const webId = '{{webId}}';
+  var certData = {};
+  var gen = {};
+  var delUpdater;
+  var certDays = 60;
+  const webId = '{{webId}}';
 
+  var init = (window.location.hash === '#init' || window.location.hash === '#admin');
 
-    var init = (window.location.hash === '#admin' || window.location.hash === '#init');
+  function initCertGen()
+  {
     var update_delegator_profile = document.querySelector('#update_delegator_profile');
     if (update_delegator_profile) {
-      update_delegator_profile.classList.toggle('hidden', !init)
+       update_delegator_profile.classList.toggle('hidden', !init)
     }
-  
+    
     getCertDays();
   
-    var btnLoad = document.getElementById('load_btn');
-    if (btnLoad)
-      btnLoad.addEventListener('click', updateData);
+    initCountries();
+    delUpdater = new UpdateDelegate();
 
-    var btnShowGenCert = document.getElementById('update_cert');
-    btnShowGenCert.addEventListener('click', showGenCertificate);
-    var btnUploadCert = document.getElementById('upload_cert');
-    btnUploadCert.addEventListener('click', uploadCertificate);
-    var btnShowGenCSR = document.getElementById('create-csr');
-    btnShowGenCSR.addEventListener('click', showGenCSR);
 
-    var btnLoadPemFile = document.getElementById('cert-file-load');
-    btnLoadPemFile.addEventListener('change', handleLoadPemFile);
+    var btnUpdate = document.querySelector('#load_btn')
+    if (btnUpdate)
+       btnUpdate.onclick = () => { updateData() }
+
+    document.querySelector('#create_cert')
+      .onclick = () => { showGenCertificate() }
+
+    document.querySelector('#create-csr')
+      .onclick = () => { showGenCSR() }
+
+    document.querySelector('#cert-file-load')
+      .onchange = (e) => { handleLoadPemFile(e) }
     
-    var btnUploadExistedCert = document.getElementById('upload-existed-cert');
-    btnUploadExistedCert.addEventListener('click', uploadExistedCertificate);
+    document.querySelector('#upload-existed-cert')
+      .onclick = () => { uploadExistedCertificate() }
 
-
-    $('#collapseOne').on('show.bs.collapse', function () {
-      $('#collapseTwo').collapse('hide');
+    $('#collapse1').on('show.bs.collapse', function () {
+      $('#collapse2').collapse('hide');
+      $('#collapse3').collapse('hide');
     })
-    $('#collapseTwo').on('show.bs.collapse', function () {
-      $('#collapseOne').collapse('hide');
+    $('#collapse2').on('show.bs.collapse', function () {
+      $('#collapse1').collapse('hide');
+      $('#collapse3').collapse('hide');
+    })
+    $('#collapse3').on('show.bs.collapse', function () {
+      $('#collapse1').collapse('hide');
+      $('#collapse2').collapse('hide');
     })
 
-    var btnGenCert = document.getElementById('gen-cert-btn');
-    btnGenCert.addEventListener('click', genCertificate);
+    document.querySelector('#gen-cert-btn')
+      .onclick = () => { genCertificate() }
 
-    var btnGenCsr = document.getElementById('gen-csr-btn');
-    btnGenCsr.addEventListener('click', genCSRequest);
-  
+    document.querySelector('#gen-csr-btn')
+      .onclick = () => { genCSRequest() }
 
+    document.querySelector('#certModal #cert_Country')
+      .onchange = (e) => {
+        var sel_country = document.querySelector('#certModal #cert_Country option:checked').value;
+
+        document.querySelector('#certModal #cert_State').value = '';
+
+        var states_list = document.querySelector('#certModal #c_states');
+        states_list.innerHTML = '';
+
+        var states = null;
+        for(var i=0; i< COUNTRIES.length; i++) {
+          var c = COUNTRIES[i];
+          if (c.ccode === sel_country) {
+            states = c.states;
+            break; 
+          }
+        }
+        if (states) {
+          for(var i=0; i < states.length; i++) {
+            var el = document.createElement('option');
+            el.value = states[i].sl;
+            states_list.appendChild(el);
+          }
+        }
+      }
+
+
+    document.querySelector('#csrModal #csr_Country')
+      .onchange = (e) => {
+        var sel_country = document.querySelector('#csrModal #csr_Country option:checked').value;
+
+        document.querySelector('#csrModal #csr_State').value = '';
+
+        var states_list = document.querySelector('#csrModal #csr_states');
+        states_list.innerHTML = '';
+
+        var states = null;
+        for(var i=0; i< COUNTRIES.length; i++) {
+          var c = COUNTRIES[i];
+          if (c.ccode === sel_country) {
+            states = c.states;
+            break; 
+          }
+        }
+        if (states) {
+          for(var i=0; i < states.length; i++) {
+            var el = document.createElement('option');
+            el.value = states[i].sl;
+            states_list.appendChild(el);
+          }
+        }
+      }
+
+    document.querySelector('#certModal #btn-delegate_uri')
+        .onclick = async () => {
+          await delUpdater.fetchDelegate(gen, webId);
+        };
+
+    document.querySelector('#certModal #btn-delegate_cert_key')
+        .onclick = async () => {
+          if (!gen.delegate_keys || gen.delegate_keys.length == 0) {
+             alert('Fetch Delegate profile at first.');
+             return; 
+          }
+          delUpdater.showCertKeys(gen);
+        };
+
+    document.querySelector('#certModal #btn-update_delegate')
+          .onclick = async () => {
+            await delUpdater.uploadDelegate(gen, webId, certData);
+          };
+    document.querySelector('#certModal #btn-update_delegator')
+          .onclick = async () => {
+            await delUpdater.uploadDelegator(gen, webId, certData);
+          };
+
+  }
+
+    
     function updateData() {
       var prof_url = '{{tlsCertWebid}}';
       var delegator = '{{webId}}';
@@ -579,7 +785,7 @@
 
       var query = `INSERT { <${prof_url}> <http://www.openlinksw.com/schemas/cert#onBehalfOf>  <${delegator}> . }`;
 
-      fetch(file_url.href,
+      solid.auth.fetch(file_url.href,
         { method: 'PATCH', 
           headers: {
             'Content-Type': 'application/sparql-update; charset=utf-8'
@@ -602,7 +808,6 @@
 
       document.getElementById('cert_pwd').value = '';
       document.getElementById('cert_pwd1').value = '';
-      document.getElementById('upload_cert').disabled = true;
       document.getElementById('cert-data').value = '';
       document.getElementById('cert-file-load').value = '';
 
@@ -628,7 +833,7 @@
       var certOrgUnit = document.getElementById('csr_OrgUnit').value;
       var certCity = document.getElementById('csr_City').value;
       var certState = document.getElementById('csr_State').value;
-      var certCountry = document.getElementById('csr_Country').value;
+      var certCountry = document.querySelector('#csrModal #csr_Country option:checked').value;
       var certPwd = document.getElementById('csr_pwd').value;
       var certPwd1 = document.getElementById('csr_pwd1').value;
 
@@ -677,6 +882,7 @@
   
     function genCertificate() {
       certData = {};
+      gen = {};
 
       var name = document.getElementById('cert_name').value;
       var email = document.getElementById('cert_email').value;
@@ -684,7 +890,7 @@
       var certOrgUnit = document.getElementById('cert_OrgUnit').value;
       var certCity = document.getElementById('cert_City').value;
       var certState = document.getElementById('cert_State').value;
-      var certCountry = document.getElementById('cert_Country').value;
+      var certCountry = document.querySelector('#certModal #cert_Country option:checked').value;
       var certPwd = document.getElementById('cert_pwd').value;
       var certPwd1 = document.getElementById('cert_pwd1').value;
 
@@ -712,6 +918,9 @@
       document.getElementById('p12-cert').hidden = true;
       document.getElementById('pkcs12-download').removeAttribute('href');
 
+
+      DOM_qHide('#certReadyModal #btn-upload_cert');
+
       $('#certModal').modal('hide');
       $('#certReadyModal').modal('show');
 
@@ -722,7 +931,14 @@
         document.getElementById('pkcs12-download').setAttribute('href', p12Url);
         document.getElementById('p12-cert').hidden = false;
         document.getElementById('cert_wait').hidden = true;
-        document.getElementById('upload_cert').disabled = false;
+        document.getElementById('btn-upload_cert').disabled = false;
+
+        DOM_qShow('#certReadyModal #btn-upload_cert');
+
+        DOM_qSel('#certReadyModal #btn-upload_cert')
+          .onclick = async () => {
+            await uploadCertificate();
+          };
 
       }, 500);
 
@@ -781,7 +997,7 @@
       formData.append('certificatePEM', certData.pem);
       formData.append('certificatePKCS12', certData.pkcs12B64);
 
-      fetch('/api/accounts/cert_new',
+      solid.auth.fetch('/api/accounts/cert_new',
         { method: 'POST', 
           headers: {
           'Accept': 'text/html, text/plain, *.*',
@@ -799,7 +1015,7 @@
             throw new Error('HTTP='+response.status+'  '+response.statusText);
           }
         } else {
-          document.getElementById('upload_cert').disabled = true;
+          document.getElementById('btn-upload_cert').disabled = true;
           var s = 'Certificate was registred on server \n'+
              ' The following actions have been applied re. WebID-TLS protocol usage:\n'+
              '- WebID-Profile Relations Update re. Public Key (modulus and exponent)\n';
@@ -807,14 +1023,14 @@
               s += '- PKCS#12 identity card saved to ~profile folder\n';
           }
 
-          $('#certReadyModal').modal('hide');
-          $('#certModal').modal('hide');
+//          $('#certReadyModal').modal('hide');
+//          $('#certModal').modal('hide');
           alert(s);
         }
       })
       .catch(function(error) {
-        $('#certReadyModal').modal('hide');
-        $('#certModal').modal('hide');
+//        $('#certReadyModal').modal('hide');
+//        $('#certModal').modal('hide');
         alert(error);
       })
     }
@@ -841,7 +1057,6 @@
 
      cert.validity.notBefore = new Date();
      cert.validity.notAfter = addDays(new Date(), certDays);
-//   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
 
      var attrs = [];
      if (certName && certName.length > 1) {
@@ -1004,7 +1219,7 @@
    }
 
    function getCertDays() {
-     fetch('/certdays',
+     solid.auth.fetch('/certdays',
           { method: 'GET', 
             headers: {
               'Accept': 'text/plain; charset=utf-8'
@@ -1022,6 +1237,345 @@
           }
         })
    }
+
+  function initCountries() 
+  {
+    var select = document.querySelector('#certModal #cert_Country');
+    select.options.length = 0;
+    var el = document.createElement('option');
+    el.text = '';
+    el.value = '';
+    select.add(el);
+
+    for(var i=0; i< COUNTRIES.length; i++) {
+      var c = COUNTRIES[i];
+      var el = document.createElement('option');
+      el.text = c.cl;
+      el.value = c.ccode;
+      select.add(el);
+    }
+
+    var select = document.querySelector('#csrModal #csr_Country');
+    select.options.length = 0;
+    var el = document.createElement('option');
+    el.text = '';
+    el.value = '';
+    select.add(el);
+
+    for(var i=0; i< COUNTRIES.length; i++) {
+      var c = COUNTRIES[i];
+      var el = document.createElement('option');
+      el.text = c.cl;
+      el.value = c.ccode;
+      select.add(el);
+    }
+  }
+
+  function DOM_qShow(sel)
+  {
+    document.querySelector(sel).classList.remove('hidden');
+  }
+  function DOM_qHide(sel)
+  {
+    document.querySelector(sel).classList.add('hidden');
+  }
+  function DOM_qSel(sel)
+  {
+    return document.querySelector(sel); 
+  }
+
+
+  class UpdateDelegate 
+  {
+
+    showCertKeys(gen) 
+    {
+      var self = this;
+      var tbody = DOM_qSel('#cert-key-dlg #cert-key-tbl tbody');
+      var keys = gen.delegate_keys;
+
+      tbody.innerHTML = '';
+
+      function mk_subitem(name, val)
+      {
+        if (val) {
+          return '<tr>'
+               +' <td style="padding-right:10px; text-align:right;" valign="top">'
+               + name
+               +' </td>'
+               +'<td style="word-break: break-word;">'+val+'</td>'
+               +'</tr>';
+        } else {
+          return '';
+        }
+      }
+
+      function mk_row(k)
+      {
+        if (!k)
+          return '';
+
+        var label = k.pkey + (k.key_label?' / '+k.key_label : '');
+
+        var s = '<td><table class="certkeys_item"><tbody>';
+
+        s+= `<tr><td style="width:20px">
+              <input type="checkbox" id="chk">
+             </td><td class="key_name">${label}</td></tr>`;
+
+        s+= `<tr><td></td><td class="dtext">
+               <input title="Show details" height="12" width="12" src="common/css/plus.png" id="det_btn" type="image">
+               Details
+             </td></tr>`;
+
+        s += '<tr> <td></td> <td> <table class="dettable hidden"> <tbody>';
+
+        s += mk_subitem('Label:', k.key_label);
+        s += mk_subitem('Title:', k.key_title);
+        s += mk_subitem('Created:', k.key_created);
+        s += mk_subitem('Modulus:', k.mod);
+        s += mk_subitem('Exponent:', k.exp);
+
+        s += '</tbody> </table> </td> </tr>';
+
+        s +=' </tbody> </table> </td>'
+
+        return s;
+      }
+
+     
+      for(var i=0; i < keys.length; i++) {
+        var s = mk_row(keys[i]);
+        if (s) {
+          var r = tbody.insertRow(-1);
+          r.innerHTML = s;
+
+          if (keys[i].mod === gen.delegate_key_mod)
+            r.querySelector('#chk').checked = true;
+
+          r.querySelector('#chk').onclick = (ev) => {
+            var chk = ev.target;
+            if (chk.checked) {
+              console.log(ev);
+              var lst = tbody.querySelectorAll('#chk');
+              for (var i=0; i < lst.length; i++) {
+                if (lst[i] !== chk)
+                  lst[i].checked = false;
+              }
+            }
+          };
+          
+          r.querySelector('#det_btn').onclick = (ev) => {
+            var btn = ev.target;
+            var item = btn.closest('table.certkeys_item');
+            var tbl = item.querySelector('table.dettable');
+            tbl.classList.toggle('hidden');
+            if (tbl.classList.contains('hidden'))
+              btn.src = "common/css/plus.png"
+            else
+              btn.src = "common/css/minus.png"
+          };
+        }
+      }
+
+      $('#cert-key-dlg').modal('show');
+      document.querySelector('#cert-key-dlg #btn-ok')
+        .onclick = () => {
+        
+          var lst = tbody.querySelectorAll('#chk');
+          for (var i=0; i < lst.length; i++) {
+            if (lst[i].checked) {
+              var k = keys[i];
+              gen.delegate_key_exp = k.exp;
+              gen.delegate_key_mod = k.mod;
+              gen.delegate_key_label = k.pkey + (k.key_label?' / '+k.key_label : '');
+              this.setDelegatorText(gen);
+              $('#cert-key-dlg').modal('hide');
+              break;
+            }
+          }
+        };
+    }
+
+    async fetchDelegate(gen, webid) 
+    {
+      var done_ok = false;
+      DOM_qShow('#certModal #delegate_wait');
+      var uri = DOM_qSel('#certModal #delegate_uri').value;
+      try {
+        var rc = await (new YouID_Loader()).verify_ID(uri);
+        if (rc.success) {
+          var s;
+
+          gen.delegate_profile = rc.profile;
+          gen.delegate_uri = rc.youid.id;
+        
+          var rkeys = await (new YouID_Loader()).getCertKeys(gen.delegate_profile, gen.delegate_uri);
+          if (rkeys.err) {
+            alert('Could not get certificate Keys from profile');
+            gen.delegate_keys = [];
+          } else {
+            gen.delegate_keys = rkeys.keys;
+          }
+
+          if (gen.delegate_keys.length===0) {
+            gen.delegate_keys.push({'pkey':'key', 'mod': rc.youid.mod, 'exp': rc.youid.exp});
+          }
+
+          var k = gen.delegate_keys[0];
+          gen.delegate_key_exp = k.exp;
+          gen.delegate_key_mod = k.mod;
+          gen.delegate_key_label = k.pkey + (k.key_label?' / '+k.key_label : '');
+
+          gen.delegator_webid = webid;
+
+          this.setDelegateText(gen);
+          this.setDelegatorText(gen);
+        }
+      }
+      catch (e) {
+        alert(e);
+      }
+      finally {
+        DOM_qHide('#certModal #delegate_wait');
+      }
+    }
+
+    async setDelegateText(gen) 
+    {
+      var s = '';
+      if (gen.delegate_uri && gen.delegator_webid) {
+         s = '@prefix oplcert: <http://www.openlinksw.com/schemas/cert#> . \n\n';
+         // delegate  -> delegator
+         s += `INSERT { \n`;
+         s += `<${gen.delegate_uri}> \n`;
+         s += `            oplcert:onBehalfOf <${gen.delegator_webid}> .\n`;
+         s += ` }\n`;
+      }
+
+      DOM_qSel('#certModal #delegate-text').value = s;
+    }
+
+    async setDelegatorText(gen) 
+    {
+      var s = '';
+      if (gen.delegator_webid && gen.delegate_uri) {
+        s = '@prefix acl: <http://www.w3.org/ns/auth/acl#> . \n' +
+          '@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . \n' +
+          '@prefix cert: <http://www.w3.org/ns/auth/cert#> . \n\n';
+
+        s += `INSERT { \n`;
+        s += `<${gen.delegator_webid}> \n`;
+        s += `      acl:delegates <${gen.delegate_uri}> . \n`;
+
+        s += `<${gen.delegate_uri}> \n`;
+        s += `   cert:key [ \n`;
+        s += `             a cert:RSAPublicKey;\n`;
+        s += `             cert:exponent  "${gen.delegate_key_exp}"^^xsd:int;\n`;
+        s += `             cert:modulus   "${gen.delegate_key_mod}"^^xsd:hexBinary\n`;
+        s += `            ] .\n`;
+        s += ` }\n`;
+      }
+
+      DOM_qSel('#certModal #delegator-text').value = s;
+
+      var btn = DOM_qSel('#certModal #btn-delegate_cert_key');
+      if (gen.delegate_uri)
+        btn.childNodes[0].nodeValue = gen.delegate_key_label;
+      else
+        btn.childNodes[0].nodeValue = 'Certificate Key';
+    }
+
+
+
+    async uploadDelegate(gen, webid, certData) 
+    {
+      if (!gen.delegate_uri) {
+        alert('Delegate profile must be fetched at first');
+        return;
+      }
+      var url = new URL(gen.delegate_uri);
+
+      if (url.protocol === 'http:')
+        url.protocol = 'https:';
+
+      url.hash = '';
+
+      var query = DOM_qSel('#certModal #delegate-text').value;
+      if (query.length < 1) {
+        alert('Delegate query is empty');
+        return;
+      }
+
+      var options = {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/sparql-update; charset=utf-8'
+        },
+        credentials: 'include',
+        body: query
+      }
+
+      DOM_qSel('#certModal #u_msg').innerText = 'Updating Delegate profile';
+      DOM_qShow('#certModal #u_wait');
+    
+      try {
+        var resp = await solid.auth.fetch(url.href, options);
+        if (!resp.ok) {
+          alert('Could not update Delegate profile HTTP=' + resp.status + '  ' + resp.statusText)
+        } else {
+          alert('Delegate relations were uploaded');
+        }
+      } catch (e) {
+        alert('Could not update Delegate profile ' + e);
+        console.log(e);
+      } finally {
+        DOM_qSel('#certModal #u_msg').innerText = '';
+        DOM_qHide('#certModal #u_wait');
+      }
+    }
+
+    async uploadDelegator(gen, webid, certData) 
+    {
+      var url = new URL(webid);
+      url.hash = '';
+
+      var query = DOM_qSel('#certModal #delegator-text').value;
+      if (query.length < 1) {
+        alert('Delegator query is empty');
+        return;
+      }
+
+      var options = {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/sparql-update; charset=utf-8'
+        },
+        credentials: 'include',
+        body: query
+      }
+
+      DOM_qSel('#certModal #u_msg').innerText = 'Updating Delegator profile';
+      DOM_qShow('#certModal #u_wait');
+      try {
+        var resp = await solid.auth.fetch(url.href, options);
+        if (!resp.ok) {
+          alert('Could not update Delegator profile HTTP=' + resp.status + '  ' + resp.statusText)
+        } else {
+          alert('Delegator relations were uploaded');
+        }
+      } catch (e) {
+        alert('Could not update Delegator profile ' + e);
+        console.log(e);
+      } finally {
+        DOM_qSel('#certModal #u_msg').innerText = '';
+        DOM_qHide('#certModal #u_wait');
+      }
+    }
+  }
+
+
+  initCertGen();
 
 })();
 

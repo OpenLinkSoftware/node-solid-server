@@ -12,6 +12,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{accountUri}}>;
+
     acl:accessTo <./publicTypeIndex.ttl>;
 
     acl:mode

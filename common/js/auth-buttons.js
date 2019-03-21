@@ -3,7 +3,7 @@
 (({ auth }) => {
   // Wire up DOM elements
   const [loginButton, logoutButton, registerButton, accountSettings, registerServerButton] =
-    ['login', 'logout', 'register', 'accountSettings', 'register-server'].map(id =>
+    ['login', 'logout', 'register', 'account-settings', 'register-server'].map(id =>
       document.getElementById(id) || document.createElement('a'))
   loginButton.addEventListener('click', login)
   logoutButton.addEventListener('click', logout)

@@ -14,6 +14,8 @@
     acl:agent  <{{extWebId}}>;
 {{/if}}
 
+    acl:origin <{{accountUri}}>;
+
     acl:accessTo </favicon.ico>;
 
     acl:mode

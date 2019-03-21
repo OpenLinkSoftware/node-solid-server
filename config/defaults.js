@@ -12,6 +12,8 @@ module.exports = {
   'serverUri': 'https://localhost:8443',
   'webid': true,
   'certDays': 60,
+  'strictOrigin': true,
+  'trustedOrigins': [],
   'dataBrowserPath': 'default'
 //  'dataBrowserPath': 'https://linkeddata.uriburner.com/describe/?url={url}&sponger:get=add'
 
