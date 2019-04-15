@@ -32,10 +32,10 @@ https://github.com/solid/
 */
 
 // Identity / WebID
-var Solid = Solid || {};
-Solid.fetch = fetch;
+var SolidPlume = SolidPlume || {};
+SolidPlume.fetch = fetch;
 
-Solid.identity = (function(window) {
+SolidPlume.identity = (function(window) {
     'use strict';
 
     // common vocabs
@@ -50,7 +50,7 @@ Solid.identity = (function(window) {
     var getProfile = function(url) {
         var promise = new Promise(function(resolve, reject) {
             // Load main profile
-            Solid.web.get(url).then(
+            SolidPlume.web.get(url).then(
                 function(graph) {
                     // set WebID
                     var webid = graph.any($rdf.sym(url), FOAF('primaryTopic'));
@@ -69,9 +69,9 @@ Solid.identity = (function(window) {
                     // Load sameAs files
                     if (sameAs.length > 0) {
                         sameAs.forEach(function(same){
-                            Solid.web.get(same.object.value, same.object.value).then(
+                            SolidPlume.web.get(same.object.value, same.object.value).then(
                                 function(g) {
-                                    Solid.utils.appendGraph(graph, g);
+                                    SolidPlume.utils.appendGraph(graph, g);
                                     toLoad--;
                                     syncAll();
                                 }
@@ -85,9 +85,9 @@ Solid.identity = (function(window) {
                     // Load seeAlso files
                     if (seeAlso.length > 0) {
                         seeAlso.forEach(function(see){
-                            Solid.web.get(see.object.value).then(
+                            SolidPlume.web.get(see.object.value).then(
                                 function(g) {
-                                    Solid.utils.appendGraph(graph, g, see.object.value);
+                                    SolidPlume.utils.appendGraph(graph, g, see.object.value);
                                     toLoad--;
                                     syncAll();
                                 }
@@ -101,9 +101,9 @@ Solid.identity = (function(window) {
                     // Load preferences files
                     if (prefs.length > 0) {
                         prefs.forEach(function(pref){
-                            Solid.web.get(pref.object.value).then(
+                            SolidPlume.web.get(pref.object.value).then(
                                 function(g) {
-                                    Solid.utils.appendGraph(graph, g, pref.object.value);
+                                    SolidPlume.utils.appendGraph(graph, g, pref.object.value);
                                     toLoad--;
                                     syncAll();
                                 }
@@ -173,8 +173,8 @@ Solid.identity = (function(window) {
     };
 }(this));
 // Events
-Solid = Solid || {};
-Solid.status = (function(window) {
+SolidPlume = SolidPlume || {};
+SolidPlume.status = (function(window) {
     'use strict';
 
     // Get current online status
@@ -199,8 +199,8 @@ Solid.status = (function(window) {
     };
 }(this));
 // Helper functions
-var Solid = Solid || {};
-Solid.utils = (function(window) {
+var SolidPlume = SolidPlume || {};
+SolidPlume.utils = (function(window) {
     'use strict';
 
     // parse a Link header
@@ -240,23 +240,23 @@ Solid.utils = (function(window) {
     };
 }(this));
 // LDP operations
-var Solid = Solid || {};
+var SolidPlume = SolidPlume || {};
 // Init some defaults;
-Solid.config = {};
-Solid.config.proxyUrl = "https://databox.me/,proxy?uri={uri}";
-Solid.config.timeout = 5000;
+SolidPlume.config = {};
+SolidPlume.config.proxyUrl = "https://databox.me/,proxy?uri={uri}";
+SolidPlume.config.timeout = 5000;
 
-Solid.web = (function(window) {
+SolidPlume.web = (function(window) {
     'use strict';
 
-    $rdf.Fetcher.crossSiteProxyTemplate = Solid.config.proxyUrl;
+    $rdf.Fetcher.crossSiteProxyTemplate = SolidPlume.config.proxyUrl;
     // common vocabs
     var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 
     // return metadata for a given request
     var parseResponseMeta = function(resp) {
         var headers = resp.headers;
-        var h = Solid.utils.parseLinkHeader(headers.get('Link'));
+        var h = SolidPlume.utils.parseLinkHeader(headers.get('Link'));
         var meta = {};
         meta.url = (headers.has('Location'))?headers.get('Location'):resp.url;
         meta.acl = h['acl'];
@@ -272,7 +272,7 @@ Solid.web = (function(window) {
     // check if a resource exists and return useful Solid info (acl, meta, type, etc)
     // resolve(metaObj)
     var head = function(url) {
-        return Solid.fetch(url, {method: 'HEAD' })
+        return SolidPlume.fetch(url, {method: 'HEAD' })
           .then((resp) => parseResponseMeta(resp))
     };
 
@@ -281,7 +281,7 @@ Solid.web = (function(window) {
     var get = function(url) {
         var promise = new Promise(function(resolve, reject) {
             var g = new $rdf.graph();
-            var f = new $rdf.fetcher(g, Solid.config.timeout);
+            var f = new $rdf.fetcher(g, SolidPlume.config.timeout);
 
             var docURI = (url.indexOf('#') >= 0)?url.slice(0, url.indexOf('#')):url;
             f.nowOrWhenFetched(docURI,undefined,function(ok, body, xhr) {
@@ -315,7 +315,7 @@ Solid.web = (function(window) {
           init['body'] = data;
         }
 
-        var promise = Solid.fetch(url, init)
+        var promise = SolidPlume.fetch(url, init)
                .then((resp) => {
                   if (resp.status === 200 || resp.status === 201) {  
                     return Promise.resolve(parseResponseMeta(resp))  
@@ -341,7 +341,7 @@ Solid.web = (function(window) {
           init['body'] = data;
         }
 
-        var promise = Solid.fetch(url, init)
+        var promise = SolidPlume.fetch(url, init)
                .then((resp) => {
                   if (resp.status === 200 || resp.status === 201) {  
                     return Promise.resolve(parseResponseMeta(resp))  
@@ -359,7 +359,7 @@ Solid.web = (function(window) {
                     method: 'DELETE',
                     credentials: 'include', 
                    }
-        var promise = Solid.fetch(url, init)
+        var promise = SolidPlume.fetch(url, init)
                .then((resp) => {
                   if (resp.status === 200) {  
                     return Promise.resolve(true)  

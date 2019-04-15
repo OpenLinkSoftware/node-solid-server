@@ -14,9 +14,9 @@ Plume = (function () {
     var PROXY = window.origin + '/proxy?uri={uri}';
     var TIMEOUT = 5000;
 
-    Solid.config.proxyUrl = PROXY;
-    Solid.config.timeout = TIMEOUT;
-    Solid.fetch = SolidAuthClient.fetch;
+    SolidPlume.config.proxyUrl = PROXY;
+    SolidPlume.config.timeout = TIMEOUT;
+    SolidPlume.fetch = solid.auth.fetch;
     $rdf.Fetcher.crossSiteProxyTemplate = PROXY;
     // common vocabs
     var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -106,7 +106,7 @@ Plume = (function () {
         applyConfig(configData);
 
     // Render the session state
-    SolidAuthClient
+    solid.auth
       .currentSession()
       .then((session) => {
          if (session) {
@@ -121,10 +121,10 @@ Plume = (function () {
         loadLocalAuthors();
 
         // Add online/offline events
-        Solid.status.onOffline(function(){
+        SolidPlume.status.onOffline(function(){
             notify('info', "You are no longer connected to the internet.", 3000);
         });
-        Solid.status.onOnline(function(){
+        SolidPlume.status.onOnline(function(){
             notify('info', "And we're back!");
         });
         // Init growl-like notifications
@@ -221,11 +221,11 @@ Plume = (function () {
 
     // Init data container
     var initContainer = function(url) {
-        Solid.web.head(url).then(
+        SolidPlume.web.head(url).then(
             function(container) {
                 // create data container for posts if it doesn't exist
                 if (!container.exists && container.xhr.status < 500) {
-                    Solid.web.post(appURL, config.defaultPath, null, true).then(
+                    SolidPlume.web.post(appURL, config.defaultPath, null, true).then(
                         function(res) {
                             if (res.url && res.url.length > 0) {
                                 config.postsURL = res.url;
@@ -262,8 +262,8 @@ Plume = (function () {
     // Log user in
     var login = function() {
         // Get the current user
-      SolidAuthClient
-        .popupLogin({ popupUri })
+        solid.auth
+        .popupLogin()
         .then((session) => {
            if (session) {
              gotWebID(session.webId, true)
@@ -277,7 +277,7 @@ Plume = (function () {
     };
     // Signup for a WebID and space
     var signup = function() {
-        Solid.auth.signup().then(function(webid) {
+        SolidPlume.auth.signup().then(function(webid) {
             gotWebID(webid, true);
         }).catch(function(err) {
             console.log("Err", err);
@@ -290,7 +290,7 @@ Plume = (function () {
         user = defaultUser;
         clearLocalStorage();
         showLogin();
-        SolidAuthClient
+        solid.auth
           .logout()
           .then(() => {
             window.location.reload();
@@ -306,7 +306,7 @@ Plume = (function () {
         hideLogin();
 
         // fetch and set user profile
-        Solid.identity.getProfile(webid).then((g) => {
+        SolidPlume.identity.getProfile(webid).then((g) => {
             var profile = getUserProfile(webid, g);
             user.name = profile.name;
             user.picture = profile.picture;
@@ -315,7 +315,7 @@ Plume = (function () {
             authors[webid] = user;
             saveLocalAuthors();
             // add workspaces
-            Solid.identity.getWorkspaces(webid, g).then((ws) => {
+            SolidPlume.identity.getWorkspaces(webid, g).then((ws) => {
                 user.workspaces = ws;
                 // save to local storage and refresh page
                 saveLocalStorage();
@@ -431,7 +431,7 @@ Plume = (function () {
 
     var deletePost = function(url) {
         if (url) {
-            Solid.web.del(url).then(
+            SolidPlume.web.del(url).then(
                 function(done) {
                     if (done) {
                         delete posts[url];
@@ -694,15 +694,15 @@ Plume = (function () {
         g.add(GRAPH('#author'), RDF('type'), SIOC('UserAccount'));
         g.add(GRAPH('#author'), SIOC('account_of'), $rdf.sym(post.author));
         g.add(GRAPH('#author'), FOAF('name'), $rdf.lit(authors[post.author].name));
-        g.add(GRAPH('#author'), SIOC('avatar'), $rdf.sym(authors[post.author].picture));
+//        g.add(GRAPH('#author'), SIOC('avatar'), $rdf.sym(authors[post.author].picture));
 
         var triples = new $rdf.Serializer(g).toN3(g);
 
         if (url) {
-            var writer = Solid.web.put(url, triples);
+            var writer = SolidPlume.web.put(url, triples);
         } else {
             var slug = makeSlug(post.title);
-            var writer = Solid.web.post(config.postsURL, slug, triples);
+            var writer = SolidPlume.web.post(config.postsURL, slug, triples);
         }
         writer.then(
             function(res) {
@@ -729,7 +729,7 @@ Plume = (function () {
         // clear previous posts
         postsdiv.innerHTML = '';
         // ask only for sioc:Post resources
-        Solid.web.get(url).then(
+        SolidPlume.web.get(url).then(
             function(g) {
                 var _posts = [];
                 var st = g.statementsMatching(undefined, RDF('type'), SIOC('Post'));
@@ -820,7 +820,7 @@ Plume = (function () {
                 });
 
                 // setup WebSocket listener since we are sure we have posts in this container
-                Solid.web.head(url).then(function(meta) {
+                SolidPlume.web.head(url).then(function(meta) {
                     if (meta.websocket.length > 0) {
                         socketSubscribe(meta.websocket, url);
                     }
@@ -840,7 +840,7 @@ Plume = (function () {
 
     var fetchPost = function(url) {
         var promise = new Promise(function(resolve, reject){
-            Solid.web.get(url).then(
+            SolidPlume.web.get(url).then(
                 function(g) {
                     var subject = g.any(undefined, RDF('type'), SIOC('Post'));
 
@@ -937,7 +937,7 @@ Plume = (function () {
             return;
         }
         authors[webid].lock = true;
-        Solid.identity.getProfile(webid).
+        SolidPlume.identity.getProfile(webid).
         then(function(g) {
             var profile = getUserProfile(webid, g);
             if (len(profile) > 0) {
@@ -1533,15 +1533,14 @@ Plume = (function () {
     // ----- INIT -----
     // start app by loading the config file
     applyConfig();
-    var http = new XMLHttpRequest();
-    http.open('get', '/plume/config.json');
-    http.onreadystatechange = function() {
-        if (this.readyState == this.DONE) {
-            init(JSON.parse(this.response));
-        }
-    };
-    http.send();
-
+    fetch('/plume/config.json')
+       .then(resp => {
+         if (resp.ok) {
+           resp.text().then(text => {
+             init(JSON.parse(text));
+           })
+         }
+       })
 
 
     // return public functions
@@ -1633,5 +1632,6 @@ Plume.menu = (function() {
         forceClose: forceClose
     }
 })();
+
 Plume.menu.init();
 
