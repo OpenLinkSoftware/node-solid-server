@@ -104,7 +104,7 @@ $ solid start
 Otherwise, if you want to use flags, this would be the equivalent
 
 ```bash
-$ solid start --multiuser --port 8443 --cert /path/to/cert --key /path/to/key --root ./data
+$ solid start --multiuser --port 8443 --ssl-cert /path/to/cert --ssl-key /path/to/key --root ./data
 ```
 
 Your users will have a dedicated folder under `./data` at `./data/<username>.<yourdomain.tld>`. Also, your root domain's website will be in `./data/<yourdomain.tld>`. New users can create accounts on `/api/accounts/new` and create new certificates on `/api/accounts/cert`. An easy-to-use sign-up tool is found on `/api/accounts`.
@@ -115,19 +115,6 @@ See [Running Solid behind a reverse proxy](https://github.com/solid/node-solid-s
 ##### How can I send emails to my users with my Gmail?
 
 > To use Gmail you may need to configure ["Allow Less Secure Apps"](https://www.google.com/settings/security/lesssecureapps) in your Gmail account unless you are using 2FA in which case you would have to create an [Application Specific](https://security.google.com/settings/security/apppasswords) password. You also may need to unlock your account with ["Allow access to your Google account"](https://accounts.google.com/DisplayUnlockCaptcha) to use SMTP.
-
-### Run the Linked Data Platform (intermediate)
-If you don't want WebID Authentication and Web Access Control, you can run a simple Linked Data Platform.
-
-```bash
-# over HTTP
-$ solid start --port 8080 --no-webid
-# over HTTPS
-$ solid start --port 8080 --ssl-key key.pem --ssl-cert cert.pem --no-webid
-```
-
-**Note:** if you want to run on HTTP, do not pass the `--ssl-*` flags, but keep `--no-webid`
-
 
 ### Extra flags (expert)
 The command line tool has the following options
