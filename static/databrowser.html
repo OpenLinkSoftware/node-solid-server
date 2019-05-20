@@ -8,27 +8,42 @@
 
     <script>
       const $SOLID_GLOBAL_config = {}
-      document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('DOMContentLoaded', async function () {
         const panes = require('mashlib')
         const UI = panes.UI
 
-    // Set up cross-site proxy
-    const $rdf = UI.rdf
-    $rdf.Fetcher.crossSiteProxyTemplate = window.origin + '/proxy?uri={uri}';
+        try {
+          var session = await SolidAuthClient.currentSession();
+          if (session && session.webId) {
+            // Make authenticated request to the server to establish a session cookie
+            var url = new URL(session.webId);
+            //console.log('webid='+session.webId);
+            url.pathname = '/settings/privateTypeIndex.ttl';
+            const {status} = await SolidAuthClient.fetch(url.href, { method: 'HEAD' })
+            if (status === 401) {
+              await SolidAuthClient.logout()
+            }
+          }
+        } catch(e) {
+          console.log(e);
+        }
+    
+        // Set up cross-site proxy
+        const $rdf = UI.rdf
+        $rdf.Fetcher.crossSiteProxyTemplate = window.origin + '/proxy?uri={uri}';
 
-    // Authenticate the user    
-    const uri = window.location.href;
-    window.document.title = 'Loading ' + uri
+        // Authenticate the user    
+        const uri = window.location.href;
+        window.document.title = 'Loading ' + uri
 
-    UI.authn.checkUser()
-      .then(function () {
-        // Set up the view for the current subject
-        const kb = UI.store
-        const subject = kb.sym(uri)
-        const outliner = panes.getOutliner(document)
-        outliner.GotoSubject(subject, true, undefined, true, undefined)
+        UI.authn.checkUser()
+          .then(function () {
+            // Set up the view for the current subject
+            const kb = UI.store
+            const subject = kb.sym(uri)
+            const outliner = panes.getOutliner(document)
+            outliner.GotoSubject(subject, true, undefined, true, undefined)
       })
-
   })
 </script>
 </head>
