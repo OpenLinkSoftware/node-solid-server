@@ -1,40 +1,20 @@
-var fs = require('fs')
-var li = require('li')
-var rm = require('./../utils').rm
-var path = require('path')
+const fs = require('fs')
+const li = require('li')
+const rm = require('./../utils').rm
+const path = require('path')
 const rdf = require('rdflib')
 const { setupSupertestServer } = require('../utils')
 
-var suffixAcl = '.acl'
-var suffixMeta = '.meta'
-var server = setupSupertestServer({
+const suffixAcl = '.acl'
+const suffixMeta = '.meta'
+const server = setupSupertestServer({
   live: true,
   dataBrowserPath: 'default',
   root: path.join(__dirname, '../resources'),
   auth: 'oidc',
   webid: false
 })
-var { assert, expect } = require('chai')
-
-/**
- * Creates a new test basic container via an LDP POST
- *   (located in `test/resources/{containerName}`)
- * @method createTestContainer
- * @param containerName {String} Container name used as slug, no leading `/`
- * @return {Promise} Promise obj, for use with Mocha's `before()` etc
- */
-function createTestContainer (containerName) {
-  return new Promise(function (resolve, reject) {
-    server.post('/')
-      .set('content-type', 'text/turtle')
-      .set('slug', containerName)
-      .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
-      .set('content-type', 'text/turtle')
-      .end(function (error, res) {
-        error ? reject(error) : resolve(res)
-      })
-  })
-}
+const { assert, expect } = require('chai')
 
 /**
  * Creates a new turtle test resource via an LDP PUT
@@ -54,17 +34,17 @@ function createTestResource (resourceName) {
 }
 
 describe('HTTP APIs', function () {
-  var emptyResponse = function (res) {
+  const emptyResponse = function (res) {
     if (res.text) {
       throw new Error('Not empty response')
     }
   }
-  var getLink = function (res, rel) {
+  const getLink = function (res, rel) {
     if (res.headers.link) {
-      var links = res.headers.link.split(',')
-      for (var i in links) {
-        var link = links[i]
-        var parsedLink = li.parse(link)
+      const links = res.headers.link.split(',')
+      for (const i in links) {
+        const link = links[i]
+        const parsedLink = li.parse(link)
         if (parsedLink[rel]) {
           return parsedLink[rel]
         }
@@ -72,9 +52,9 @@ describe('HTTP APIs', function () {
     }
     return undefined
   }
-  var hasHeader = function (rel, value) {
-    var handler = function (res) {
-      var link = getLink(res, rel)
+  const hasHeader = function (rel, value) {
+    const handler = function (res) {
+      const link = getLink(res, rel)
       if (link) {
         if (link !== value) {
           throw new Error('Not same value: ' + value + ' != ' + link)
@@ -163,9 +143,11 @@ describe('HTTP APIs', function () {
         .end(done)
     })
 
-    it('should have set Link as resource on a implicit index page', function (done) {
+    // This test is probably wrong: it is not a container if there is an index page
+    it.skip('should have set Link as resource on a implicit index page', function (done) {
       server.options('/sampleContainer/')
-        .expect('Link', /<http:\/\/www.w3.org\/ns\/ldp#Resource>; rel="type"/)
+        .expect('Link', /<http:\/\/www.w3.org\/ns\/ldp#BasicContainer>; rel="type"/)
+        .expect('Link', /<http:\/\/www.w3.org\/ns\/ldp#Container>; rel="type"/)
         .end(done)
     })
 
@@ -201,7 +183,7 @@ describe('HTTP APIs', function () {
             return done(err)
           }
 
-          var size = fs.statSync(path.join(__dirname,
+          const size = fs.statSync(path.join(__dirname,
             '../resources/sampleContainer/solid.png')).size
           if (res.body.length !== size) {
             return done(new Error('files are not of the same size'))
@@ -322,11 +304,11 @@ describe('HTTP APIs', function () {
         .expect(200, done)
     })
     it('should have glob support', function (done) {
-      server.get('/sampleContainer/example*')
+      server.get('/sampleContainer/*')
         .expect('content-type', /text\/turtle/)
         .expect(200)
         .expect((res) => {
-          let kb = rdf.graph()
+          const kb = rdf.graph()
           rdf.parse(res.text, kb, 'https://localhost/', 'text/turtle')
 
           assert(kb.match(
@@ -377,6 +359,20 @@ describe('HTTP APIs', function () {
           .expect('content-type', /text\/html/)
           .end(done)
       })
+    it('should return turtle if requesting a conatiner that has index.html with conteent-type text/turtle', (done) => {
+      server.get('/sampleContainer/')
+        .set('accept', 'text/turtle')
+        .expect(200)
+        .expect('content-type', /text\/turtle/)
+        .end(done)
+    })
+    it('should return turtle if requesting a container that conatins an index.html file with a content type where some rdf format is ranked higher than html', (done) => {
+      server.get('/sampleContainer/')
+        .set('accept', 'image/*;q=0.9, */*;q=0.1, application/rdf+xml;q=0.9, application/xhtml+xml, text/xml;q=0.5, application/xml;q=0.5, text/html;q=0.9, text/plain;q=0.5, text/n3;q=1.0, text/turtle;q=1')
+        .expect(200)
+        .expect('content-type', /text\/turtle/)
+        .end(done)
+    })
     it('should still redirect to the right container URI if missing / and HTML is requested',
       function (done) {
         server.get('/sampleContainer')
@@ -455,15 +451,40 @@ describe('HTTP APIs', function () {
   })
 
   describe('PUT API', function () {
-    var putRequestBody = fs.readFileSync(path.join(__dirname,
+    const putRequestBody = fs.readFileSync(path.join(__dirname,
       '../resources/sampleContainer/put1.ttl'), {
-        'encoding': 'utf8'
-      })
+      encoding: 'utf8'
+    })
     it('should create new resource', function (done) {
       server.put('/put-resource-1.ttl')
         .send(putRequestBody)
-        .set('content-type', 'text/turtle')
+        .set('content-type', 'text/plain')
         .expect(201, done)
+    })
+    it('should fail with 400 if not content-type', function (done) {
+      server.put('/put-resource-1.ttl')
+        .send(putRequestBody)
+        .set('content-type', '')
+        .expect(400, done)
+    })
+    it('should create new resource and delete old path if different', function (done) {
+      server.put('/put-resource-1.ttl')
+        .send(putRequestBody)
+        .set('content-type', 'text/turtle')
+        .expect(201)
+        .end(function (err) {
+          if (err) return done(err)
+          if (fs.existsSync(path.join(__dirname, '../resources/put-resource-1.ttl$.txt'))) {
+            return done(new Error('Can read old file that should have been deleted'))
+          }
+          done()
+        })
+    })
+    it('should reject create .acl resource, if contentType not text/turtle', function (done) {
+      server.put('/put-resource-1.acl')
+        .send(putRequestBody)
+        .set('content-type', 'text/plain')
+        .expect(415, done)
     })
     it('should create directories if they do not exist', function (done) {
       server.put('/foo/bar/baz.ttl')
@@ -473,10 +494,44 @@ describe('HTTP APIs', function () {
         .expect(hasHeader('acl', 'baz.ttl' + suffixAcl))
         .expect(201, done)
     })
-    it('should return 409 code when trying to put to a container',
+    it('should not create new resource if folder with same name exists', function (done) {
+      server.put('/foo/bar')
+        .send(putRequestBody)
+        .set('content-type', 'text/turtle')
+        .expect(hasHeader('describedBy', 'bar' + suffixMeta))
+        .expect(hasHeader('acl', 'bar' + suffixAcl))
+        .expect(200, done)
+    })
+    it('should return 201 when trying to put to a container without content-type',
       function (done) {
-        server.put('/')
-          .expect(409, done)
+        server.put('/foo/bar/test/')
+          // .set('content-type', 'text/turtle')
+          .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+          .expect(201, done)
+      }
+    )
+    it('should return 201 code when trying to put to a container',
+      function (done) {
+        server.put('/foo/bar/test/')
+          .set('content-type', 'text/turtle')
+          .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+          .expect(201, done)
+      }
+    )
+    it('should return 201 when trying to put to a container without content-type',
+      function (done) {
+        server.put('/foo/bar/test/')
+          // .set('content-type', 'text/turtle')
+          .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+          .expect(201, done)
+      }
+    )
+    it('should return 201 code when trying to put to a container',
+      function (done) {
+        server.put('/foo/bar/test/')
+          .set('content-type', 'text/turtle')
+          .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+          .expect(201, done)
       }
     )
     // Cleanup
@@ -490,10 +545,43 @@ describe('HTTP APIs', function () {
       // Ensure all these are finished before running tests
       return Promise.all([
         rm('/false-file-48484848'),
-        createTestContainer('delete-test-empty-container'),
+        createTestResource('/.acl'),
+        createTestResource('/delete-test-empty-container/.meta.acl'),
         createTestResource('/put-resource-1.ttl'),
+        createTestResource('/put-resource-with-acl.ttl'),
+        createTestResource('/put-resource-with-acl.ttl.acl'),
+        createTestResource('/put-resource-with-acl.txt'),
+        createTestResource('/put-resource-with-acl.txt.acl'),
         createTestResource('/delete-test-non-empty/test.ttl')
       ])
+    })
+
+    it('should return 405 status when deleting root folder', function (done) {
+      server.delete('/')
+        .expect(405)
+        .end((err, res) => {
+          if (err) return done(err)
+          try {
+            assert.equal(res.get('allow').includes('DELETE'), false)
+          } catch (err) {
+            return done(err)
+          }
+          done()
+        })
+    })
+
+    it('should return 405 status when deleting root acl', function (done) {
+      server.delete('/' + suffixAcl)
+        .expect(405)
+        .end((err, res) => {
+          if (err) return done(err)
+          try {
+            assert.equal(res.get('allow').includes('DELETE'), false) // ,'res methods')
+          } catch (err) {
+            return done(err)
+          }
+          done()
+        })
     })
 
     it('should return 404 status when deleting a file that does not exists',
@@ -507,12 +595,32 @@ describe('HTTP APIs', function () {
         .expect(200, done)
     })
 
+    it('should delete previously PUT file with ACL', function (done) {
+      server.delete('/put-resource-with-acl.ttl')
+        .expect(200, done)
+    })
+
+    it('should return 404 on deleting .acl of previously deleted PUT file with ACL', function (done) {
+      server.delete('/put-resource-with-acl.ttl.acl')
+        .expect(404, done)
+    })
+
+    it('should delete previously PUT file with bad extension and with ACL', function (done) {
+      server.delete('/put-resource-with-acl.txt')
+        .expect(200, done)
+    })
+
+    it('should return 404 on deleting .acl of previously deleted PUT file with bad extension and with ACL', function (done) {
+      server.delete('/put-resource-with-acl.txt.acl')
+        .expect(404, done)
+    })
+
     it('should fail to delete non-empty containers', function (done) {
       server.delete('/delete-test-non-empty/')
         .expect(409, done)
     })
 
-    it('should delete a new and empty container', function (done) {
+    it('should delete a new and empty container - with .meta.acl', function (done) {
       server.delete('/delete-test-empty-container/')
         .end(() => {
           server.get('/delete-test-empty-container/')
@@ -525,6 +633,7 @@ describe('HTTP APIs', function () {
       // Clean up after DELETE API tests
       rm('/put-resource-1.ttl')
       rm('/delete-test-non-empty/')
+      rm('/delete-test-empty-container/test.txt.acl')
       rm('/delete-test-empty-container/')
     })
   })
@@ -533,20 +642,21 @@ describe('HTTP APIs', function () {
     before(function () {
       // Ensure all these are finished before running tests
       return Promise.all([
-        createTestContainer('post-tests'),
-        rm('post-test-target.ttl')
-        // createTestResource('/put-resource-1.ttl'),
+        createTestResource('/post-tests/put-resource'),
+        // createTestContainer('post-tests'),
+        rm('post-test-target.ttl') // ,
+        // createTestResource('/post-tests/put-resource')
       ])
     })
 
-    var postRequest1Body = fs.readFileSync(path.join(__dirname,
+    const postRequest1Body = fs.readFileSync(path.join(__dirname,
       '../resources/sampleContainer/put1.ttl'), {
-        'encoding': 'utf8'
-      })
-    var postRequest2Body = fs.readFileSync(path.join(__dirname,
+      encoding: 'utf8'
+    })
+    const postRequest2Body = fs.readFileSync(path.join(__dirname,
       '../resources/sampleContainer/post2.ttl'), {
-        'encoding': 'utf8'
-      })
+      encoding: 'utf8'
+    })
     it('should create new resource', function (done) {
       server.post('/post-tests/')
         .send(postRequest1Body)
@@ -556,6 +666,57 @@ describe('HTTP APIs', function () {
         .expect(hasHeader('describedBy', suffixMeta))
         .expect(hasHeader('acl', suffixAcl))
         .expect(201, done)
+    })
+    it('should create new resource even if body is empty', function (done) {
+      server.post('/post-tests/')
+        .set('slug', 'post-resource-empty')
+        .set('content-type', 'text/turtle')
+        .expect(hasHeader('describedBy', suffixMeta))
+        .expect(hasHeader('acl', suffixAcl))
+        .expect('location', /.*\.ttl/)
+        .expect(201, done)
+    })
+    it('should error with 404 to create folder with same name as a resource', function (done) {
+      server.post('/post-tests/')
+        .set('content-type', 'text/turtle')
+        .set('slug', 'put-resource')
+        .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+        .send(postRequest2Body)
+        .expect(404)
+        .end(function (err, res) {
+          const name = res.headers.location
+          const folderPath = path.join(__dirname, '../resources/post-tests/put-resource/')
+          const is = fs.existsSync(folderPath)
+          if (!is) {
+            return done()
+          } else done(new Error('Can read folder, should not' + name + err))
+        })
+    })
+    it('should error with 403 if auxiliary resource file.acl', function (done) {
+      server.post('/post-tests/')
+        .set('slug', 'post-acl-no-content-type.acl')
+        .send(postRequest1Body)
+        .set('content-type', 'text/turtle')
+        .expect(403, done)
+    })
+    it('should error with 403 if auxiliary resource .meta', function (done) {
+      server.post('/post-tests/')
+        .set('slug', '.meta')
+        .send(postRequest1Body)
+        .set('content-type', 'text/turtle')
+        .expect(403, done)
+    })
+    it('should error with 400 if the body is empty and no content type is provided', function (done) {
+      server.post('/post-tests/')
+        .set('slug', 'post-resource-empty-fail')
+        .expect(400, done)
+    })
+    it('should error with 400 if the body is provided but there is no content-type header', function (done) {
+      server.post('/post-tests/')
+        .set('slug', 'post-resource-rdf-no-content-type')
+        .send(postRequest1Body)
+        .set('content-type', '')
+        .expect(400, done)
     })
     it('should create new resource even if no trailing / is in the target',
       function (done) {
@@ -588,8 +749,8 @@ describe('HTTP APIs', function () {
         .expect(200, done)
     })
     // Capture the resource name generated by server by parsing Location: header
-    var postedResourceName
-    var getResourceName = function (res) {
+    let postedResourceName
+    const getResourceName = function (res) {
       postedResourceName = res.header.location
     }
     it('should create new resource without slug header', function (done) {
@@ -608,13 +769,13 @@ describe('HTTP APIs', function () {
     it('should create container', function (done) {
       server.post('/post-tests/')
         .set('content-type', 'text/turtle')
-        .set('slug', 'loans')
+        .set('slug', 'loans.ttl')
         .set('link', '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
         .send(postRequest2Body)
         .expect(201)
         .end(function (err) {
           if (err) return done(err)
-          var stats = fs.statSync(path.join(__dirname, '../resources/post-tests/loans/'))
+          const stats = fs.statSync(path.join(__dirname, '../resources/post-tests/loans.ttl/'))
           if (!stats.isDirectory()) {
             return done(new Error('Cannot read container just created'))
           }
@@ -622,14 +783,30 @@ describe('HTTP APIs', function () {
         })
     })
     it('should be able to access newly container', function (done) {
-      server.get('/post-tests/loans/')
+      server.get('/post-tests/loans.ttl/')
         .expect('content-type', /text\/turtle/)
         .expect(200, done)
     })
-
+    it('should error with 404 to create resource with same name as a container', function (done) {
+      server.post('/post-tests/')
+        .send(postRequest1Body)
+        .set('content-type', 'text/turtle')
+        .set('slug', 'loans')
+        .expect(404)
+        .end(function (err, res) {
+          let name = 'loans.ttl'
+          if (err) name = res.headers.location
+          const filePath = path.join(__dirname, '../resources/post-tests/' + name)
+          const stats = fs.statSync(filePath)
+          if (!stats.isDirectory()) {
+            return done(new Error('Can read file, should not' + name))
+          }
+          done()
+        })
+    })
     it('should create a container with a name hex decoded from the slug', (done) => {
-      let containerName = 'Film%4011'
-      let expectedDirName = '/post-tests/Film@11/'
+      const containerName = 'Film%4011'
+      const expectedDirName = '/post-tests/Film@11/'
       server.post('/post-tests/')
         .set('slug', containerName)
         .set('content-type', 'text/turtle')
@@ -640,7 +817,7 @@ describe('HTTP APIs', function () {
           try {
             assert.equal(res.headers.location, expectedDirName,
               'Uri container names should be encoded')
-            let createdDir = fs.statSync(path.join(__dirname, '../resources', expectedDirName))
+            const createdDir = fs.statSync(path.join(__dirname, '../resources', expectedDirName))
             assert(createdDir.isDirectory(), 'Container should have been created')
           } catch (err) {
             return done(err)
@@ -661,8 +838,8 @@ describe('HTTP APIs', function () {
         let response
         before(() =>
           server.post('/post-tests/')
-                .set('content-type', 'text/turtle; charset=utf-8')
-                .then(res => { response = res })
+            .set('content-type', 'text/turtle; charset=utf-8')
+            .then(res => { response = res })
         )
 
         it('is assigned an URL with the .ttl extension', () => {
@@ -675,9 +852,9 @@ describe('HTTP APIs', function () {
         let response
         before(() =>
           server.post('/post-tests/')
-                .set('slug', 'slug1')
-                .set('content-type', 'text/turtle; charset=utf-8')
-                .then(res => { response = res })
+            .set('slug', 'slug1')
+            .set('content-type', 'text/turtle; charset=utf-8')
+            .then(res => { response = res })
         )
 
         it('is assigned an URL with the .ttl extension', () => {
@@ -689,8 +866,8 @@ describe('HTTP APIs', function () {
         let response
         before(() =>
           server.post('/post-tests/')
-                .set('content-type', 'text/html; charset=utf-8')
-                .then(res => { response = res })
+            .set('content-type', 'text/html; charset=utf-8')
+            .then(res => { response = res })
         )
 
         it('is assigned an URL with the .html extension', () => {
@@ -703,9 +880,9 @@ describe('HTTP APIs', function () {
         let response
         before(() =>
           server.post('/post-tests/')
-                .set('slug', 'slug2')
-                .set('content-type', 'text/html; charset=utf-8')
-                .then(res => { response = res })
+            .set('slug', 'slug2')
+            .set('content-type', 'text/html; charset=utf-8')
+            .then(res => { response = res })
         )
 
         it('is assigned an URL with the .html extension', () => {
@@ -748,6 +925,7 @@ describe('HTTP APIs', function () {
     after(function () {
       // Clean up after POST API tests
       return Promise.all([
+        rm('/post-tests/put-resource'),
         rm('/post-tests/'),
         rm('post-test-target.ttl')
       ])
@@ -764,12 +942,12 @@ describe('HTTP APIs', function () {
           .end(function (err) {
             if (err) return done(err)
 
-            var sizeNicola = fs.statSync(path.join(__dirname,
+            const sizeNicola = fs.statSync(path.join(__dirname,
               '../resources/nicola.jpg')).size
-            var sizeTim = fs.statSync(path.join(__dirname, '../resources/timbl.jpg')).size
-            var sizeNicolaLocal = fs.statSync(path.join(__dirname,
+            const sizeTim = fs.statSync(path.join(__dirname, '../resources/timbl.jpg')).size
+            const sizeNicolaLocal = fs.statSync(path.join(__dirname,
               '../resources/sampleContainer/nicola.jpg')).size
-            var sizeTimLocal = fs.statSync(path.join(__dirname,
+            const sizeTimLocal = fs.statSync(path.join(__dirname,
               '../resources/sampleContainer/timbl.jpg')).size
 
             if (sizeNicola === sizeNicolaLocal && sizeTim === sizeTimLocal) {

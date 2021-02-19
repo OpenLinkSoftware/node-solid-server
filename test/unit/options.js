@@ -1,6 +1,6 @@
-var assert = require('chai').assert
+const assert = require('chai').assert
 
-var options = require('../../bin/lib/options')
+const options = require('../../bin/lib/options')
 
 describe('Command line options', function () {
   describe('options', function () {
@@ -10,7 +10,7 @@ describe('Command line options', function () {
 
     it('contains only `name`s that are kebab-case', function () {
       assert.equal(
-        options.every(({name}) => (/^[a-z][a-z0-9-]*$/).test(name)),
+        options.every(({ name }) => (/^[a-z][a-z0-9-]*$/).test(name)),
         true
       )
     })

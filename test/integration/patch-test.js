@@ -23,7 +23,7 @@ const serverOptions = {
 }
 
 describe('PATCH', () => {
-  var request
+  let request
   let server
 
   // Start the server
@@ -40,7 +40,7 @@ describe('PATCH', () => {
   describe('with a patch document', () => {
     describe('with an unsupported content type', describePatch({
       path: '/read-write.ttl',
-      patch: `other syntax`,
+      patch: 'other syntax',
       contentType: 'text/other'
     }, { // expected:
       status: 415,
@@ -49,7 +49,7 @@ describe('PATCH', () => {
 
     describe('containing invalid syntax', describePatch({
       path: '/read-write.ttl',
-      patch: `invalid syntax`
+      patch: 'invalid syntax'
     }, { // expected:
       status: 400,
       text: 'Patch document syntax error'
@@ -57,7 +57,7 @@ describe('PATCH', () => {
 
     describe('without relevant patch element', describePatch({
       path: '/read-write.ttl',
-      patch: `<> a solid:Patch.`
+      patch: '<> a solid:Patch.'
     }, { // expected:
       status: 400,
       text: 'No patch for https://tim.localhost:7777/read-write.ttl found'
@@ -65,7 +65,7 @@ describe('PATCH', () => {
 
     describe('with neither insert nor delete', describePatch({
       path: '/read-write.ttl',
-      patch: `<> solid:patches <https://tim.localhost:7777/read-write.ttl>.`
+      patch: '<> solid:patches <https://tim.localhost:7777/read-write.ttl>.'
     }, { // expected:
       status: 400,
       text: 'Patch should at least contain inserts or deletes'
@@ -424,10 +424,10 @@ describe('PATCH', () => {
 
   // Creates a PATCH test for the given resource with the given expected outcomes
   function describePatch ({ path, exists = true, patch, contentType = 'text/n3' },
-                          { status = 200, text, result }) {
+    { status = 200, text, result }) {
     return () => {
       const filename = `patch${path}`
-      var originalContents
+      let originalContents
       // Back up and restore an existing file
       if (exists) {
         before(() => backup(filename))
@@ -443,13 +443,13 @@ describe('PATCH', () => {
       }
 
       // Create the request and obtain the response
-      var response
+      let response
       before((done) => {
         request.patch(path)
-               .set('Content-Type', contentType)
-               .send(`@prefix solid: <http://www.w3.org/ns/solid/terms#>.\n${patch}`)
-               .then(res => { response = res })
-               .then(done, done)
+          .set('Content-Type', contentType)
+          .send(`@prefix solid: <http://www.w3.org/ns/solid/terms#>.\n${patch}`)
+          .then(res => { response = res })
+          .then(done, done)
       })
 
       // Verify the response's status code and body text

@@ -11,7 +11,7 @@
 <div class="container">
   <div class="page-header">
     <div class="pull-right">
-      <button id="register-server" type="button" class="btn btn-primary">Register</button>
+      <button id="register" type="button" class="btn btn-primary">Register</button>
       <button id="login"    type="button" class="hidden btn btn-default btn-success">Log in</button>
       <button id="logout"   type="button" class="hidden btn btn-danger">Log out</button>
     </div>
@@ -57,7 +57,7 @@ Note: As a test and prototype server, there are no performance, security, or sta
       <dd>{{serverDescription}}</dd>
       {{/if}}
       <dt>Details</dt>
-      <dd>Running on <a href="https://www.w3.org/community/solid/wiki/">Solid {{serverVersion}}</a></dd>
+      <dd>Running on <a href="https://github.com/solid/node-solid-server/releases/tag/v{{serverVersion}}">Solid {{serverVersion}}</a></dd>
     </dl>
   </section>
 </div>

@@ -1,10 +1,10 @@
-var assert = require('chai').assert
-var path = require('path')
-var nock = require('nock')
-var { checkDnsSettings, setupSupertestServer } = require('../utils')
+const assert = require('chai').assert
+const path = require('path')
+const nock = require('nock')
+const { checkDnsSettings, setupSupertestServer } = require('../utils')
 
 describe('CORS Proxy', () => {
-  var server = setupSupertestServer({
+  const server = setupSupertestServer({
     root: path.join(__dirname, '../resources'),
     corsProxy: '/proxy',
     webid: false
@@ -22,7 +22,7 @@ describe('CORS Proxy', () => {
     let headers
     nock('https://example.org').get('/').reply(function (uri, body) {
       headers = this.req.headers
-      return 200
+      return [200]
     })
     server.get('/proxy?uri=https://example.org/')
       .expect(200)
@@ -83,10 +83,10 @@ describe('CORS Proxy', () => {
     nock('https://example.org')
       .get('/')
       .reply(function (uri, req) {
-        if (this.req.headers['accept'] !== 'text/turtle') {
+        if (this.req.headers.accept !== 'text/turtle') {
           throw Error('Accept is received on the header')
         }
-        if (this.req.headers['test'] && this.req.headers['test'] === 'test1') {
+        if (this.req.headers.test && this.req.headers.test === 'test1') {
           return [200, 'YES']
         } else {
           return [500, 'empty']
@@ -107,7 +107,7 @@ describe('CORS Proxy', () => {
     nock('https://example.org').get('/').reply(200)
     server.get('/proxy/?uri=https://example.org/')
       .expect((a) => {
-        assert.equal(a.header['link'], null)
+        assert.equal(a.header.link, null)
       })
       .expect(200, done)
   })

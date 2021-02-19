@@ -68,6 +68,13 @@ $ solid start --root path/to/folder --port 8443 --ssl-key path/to/ssl-key.pem --
 
 Solid requires SSL certificates to be valid, so you cannot use self-signed certificates. To switch off this security feature in development environments, you can use the `bin/solid-test` executable, which unsets the `NODE_TLS_REJECT_UNAUTHORIZED` flag and sets the `rejectUnauthorized` option.
 
+If you want to run in multi-user mode on localhost, do the following:
+* configure the server as such with `bin/solid-test init`
+* start the server with `bin/solid-test start`
+* visit https://localhost:8443 and register a user, for instance 'myusername'.
+* Edit your hosts file and add a line `127.0.0.1 myusername.localhost`
+* Now you can visit https://myusername.localhost:8443.
+
 ##### How do I get an SSL key and certificate?
 You need an SSL certificate from a _certificate authority_, such as your domain provider or [Let's Encrypt!](https://letsencrypt.org/getting-started/).
 
@@ -83,6 +90,9 @@ in a directory one level higher from the current, so that you don't
 accidentally commit your certificates to `solid` while you're developing.
 
 If you would like to get rid of the browser warnings, import your fullchain.pem certificate into your 'Trusted Root Certificate' store.
+
+### Running Solid behind a reverse proxy (such as NGINX)
+See [Running Solid behind a reverse proxy](https://github.com/solid/node-solid-server/wiki/Running-Solid-behind-a-reverse-proxy).
 
 ### Run multi-user server (intermediate)
 
@@ -109,12 +119,26 @@ $ solid start --multiuser --port 8443 --ssl-cert /path/to/cert --ssl-key /path/t
 
 Your users will have a dedicated folder under `./data` at `./data/<username>.<yourdomain.tld>`. Also, your root domain's website will be in `./data/<yourdomain.tld>`. New users can create accounts on `/api/accounts/new` and create new certificates on `/api/accounts/cert`. An easy-to-use sign-up tool is found on `/api/accounts`.
 
-### Running Solid behind a reverse proxy (such as NGINX)
-See [Running Solid behind a reverse proxy](https://github.com/solid/node-solid-server/wiki/Running-Solid-behind-a-reverse-proxy).
-
 ##### How can I send emails to my users with my Gmail?
 
 > To use Gmail you may need to configure ["Allow Less Secure Apps"](https://www.google.com/settings/security/lesssecureapps) in your Gmail account unless you are using 2FA in which case you would have to create an [Application Specific](https://security.google.com/settings/security/apppasswords) password. You also may need to unlock your account with ["Allow access to your Google account"](https://accounts.google.com/DisplayUnlockCaptcha) to use SMTP.
+
+also add to `config.json`
+``` 
+  "useEmail": true,
+  "emailHost": "smtp.gmail.com",
+  "emailPort": "465",
+  "emailAuthUser": "xxxx@gmail.com",
+  "emailAuthPass": "gmailPass"
+```
+
+### Upgrading from version <5.3
+Please take into account the [v5.3 upgrade notes](https://github.com/solid/node-solid-server/blob/master/CHANGELOG.md#530-upgrade-notes).
+
+### Upgrading from version <5.0
+To upgrade from version 4 to the current version 5, you need to run a migration script, as explained in the [v5.0 upgrade notes](https://github.com/solid/node-solid-server/blob/master/CHANGELOG.md#500-upgrade-notes).
+
+Also, be aware that starting from version 5, third-party apps are untrusted by default. To trust a third-party app, before you can log in to it, you first need to go to your profile at https://example.com/profile/card#me (important to include the '#me' there), and then hover over the 'card' header to reveal the context menu. From there, select the 'A' symbol to go to your trusted applications pane, where you can whitelist third-party apps before using them. See also https://github.com/solid/node-solid-server/issues/1142 about streamlining this UX flow.
 
 ### Extra flags (expert)
 The command line tool has the following options
@@ -194,7 +218,7 @@ $ solid start --help
     --support-email [value]       The support email you provide for your users (not required)
     -q, --quiet                   Do not print the logs to console
     -h, --help                    output usage information
- ```
+```
 
 Instead of using flags, these same options can also be configured via environment variables taking the form of `SOLID_` followed by the `SNAKE_CASE` of the flag. For example `--api-apps` can be set via the `SOLID_API_APPS`environment variable, and `--serverUri` can be set with `SOLID_SERVER_URI`.
 
@@ -204,9 +228,20 @@ Configuring Solid via the config file can be a concise and convenient method and
 
 ## Use Docker
 
-Build with:
+
+### Production usage
+
+See the [documentation to run Solid using docker and docker-compose](https://github.com/solid/node-solid-server/tree/master/docker-image).
+
+We have automatic builds set up, so commits to master will trigger a build of https://hub.docker.com/r/nodesolidserver/node-solid-server.
+
+### Development usage
+
+If you want to use Docker in development, then you can build it locally with:
 
 ```bash
+git clone https://github.com/solid/node-solid-server
+cd node-solid-server
 docker build -t node-solid-server .
 ```
 
@@ -217,18 +252,27 @@ docker run -p 8443:8443 --name solid node-solid-server
 
 This will enable you to login to solid on https://localhost:8443 and then create a new account
 but not yet use that account. After a new account is made you will need to create an entry for 
-it in your local (/etc/)hosts file in line with the account and subdomain i.e. 
+it in your local (/etc/)hosts file in line with the account and subdomain, i.e. --
 
+```pre
 127.0.0.1	newsoliduser.localhost
-
-Then you'll be able to use solid as intended.
+```
 
 You can modify the config within the docker container as follows:
 
- - Copy the config to the current directory with: `docker cp solid:/usr/src/app/config.json .`
+ - Copy the `config.json` to the current directory with: 
+   ```bash
+   docker cp solid:/usr/src/app/config.json .
+   ```
  - Edit the `config.json` file
- - Copy the file back with `docker cp config.json solid:/usr/src/app/`
- - Restart the server with `docker restart solid`
+ - Copy the file back with 
+   ```bash
+   docker cp config.json solid:/usr/src/app/
+   ```
+ - Restart the server with 
+   ```bash
+   docker restart solid
+   ```
 
 ## Library Usage
 
@@ -252,18 +296,18 @@ default settings.
 
 ```javascript
 {
-  cache: 0, // Set cache time (in seconds), 0 for no cache
-  live: true, // Enable live support through WebSockets
-  root: './', // Root location on the filesystem to serve resources
-  secret: 'node-ldp', // Express Session secret key
-  cert: false, // Path to the ssl cert
-  key: false, // Path to the ssl key
-  mount: '/', // Where to mount Linked Data Platform
-  webid: false, // Enable WebID+TLS authentication
-  suffixAcl: '.acl', // Suffix for acl files
-  corsProxy: false, // Where to mount the CORS proxy
-  errorHandler: false, // function(err, req, res, next) to have a custom error handler
-  errorPages: false // specify a path where the error pages are
+  cache:        0,           // Set cache time (in seconds), 0 for no cache
+  live:         true,        // Enable live support through WebSockets
+  root:         './',        // Root location on the filesystem to serve resources
+  secret:       'node-ldp',  // Express Session secret key
+  cert:         false,       // Path to the ssl cert
+  key:          false,       // Path to the ssl key
+  mount:        '/',         // Where to mount Linked Data Platform
+  webid:        false,       // Enable WebID+TLS authentication
+  suffixAcl:    '.acl',      // Suffix for acl files
+  corsProxy:    false,       // Where to mount the CORS proxy
+  errorHandler: false,       // function(err, req, res, next) to have a custom error handler
+  errorPages:   false        // specify a path where the error pages are
 }
 ```
 
@@ -389,16 +433,18 @@ it. It is currently adviceable to remove it or set it inactive rather
 than set a large quota, because the current implementation will impair
 write performance if there is a lot of data.
 
-## Contribute to Solid
+## Get help and contribute
 
 Solid is only possible because of a large community of [contributors](https://github.com/solid/node-solid-server/blob/master/CONTRIBUTORS.md).
 A heartfelt thank you to everyone for all of your efforts!
 
-You can help us too:
+You can receive or provide help too:
 
-- [Join us in Gitter](https://gitter.im/solid/chat) to help with development or to hang out with us :)
+- [Join us in Gitter](https://gitter.im/solid/chat) to chat about Solid or to hang out with us :)
+- [NSS Gitter channel](https://gitter.im/solid/node-solid-server) for specific (installation) advice about this code base
 - [Create a new issue](https://github.com/solid/node-solid-server/issues/new) to report bugs
 - [Fix an issue](https://github.com/solid/node-solid-server/issues)
+- Reach out to Jackson at jacksonm@inrupt.com to become more involved in maintaining Node Solid Server
 
 Have a look at [CONTRIBUTING.md](https://github.com/solid/node-solid-server/blob/master/CONTRIBUTING.md).
 

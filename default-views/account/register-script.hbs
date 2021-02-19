@@ -28,7 +28,7 @@
  function runContinue() {
    document.getElementById('certificatePEM').value = certData.pem
    document.getElementById('certificatePKCS12').value = certData.pkcs12B64
-   document.getElementById('reg-form').submit()
+   document.getElementById('RegisterForm').submit()
  }
 
 
@@ -71,7 +71,7 @@
     }
 
     if (!needCreateCert) {
-      document.getElementById('reg-form').submit()
+      document.getElementById('RegisterForm').submit()
     } 
     else {
       let certOrg = document.getElementById("cert_Org").value;

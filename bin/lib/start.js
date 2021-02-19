@@ -43,28 +43,23 @@ module.exports = function (program, server) {
 
 function bin (argv, server) {
   if (!argv.email) {
-    let user = argv['emailAuthUser']
-    if (user) {
-      argv.email = {
-        host: argv['emailHost'],
-        port: argv['emailPort'],
-        secure: true,
-        auth: {
-          user: argv['emailAuthUser'],
-          pass: argv['emailAuthPass']
-        }
-      }
-    } else {
-      argv.email = {
-        host: argv['emailHost'],
-        port: argv['emailPort'],
-        secure: true,
+    argv.email = {
+      host: argv.emailHost,
+      port: argv.emailPort,
+      secure: true,
+      auth: {
+        user: argv.emailAuthUser,
+        pass: argv.emailAuthPass
       }
     }
-    delete argv['emailHost']
-    delete argv['emailPort']
-    delete argv['emailAuthUser']
-    delete argv['emailAuthPass']
+    delete argv.emailHost
+    delete argv.emailPort
+    delete argv.emailAuthUser
+    delete argv.emailAuthPass
+  }
+
+  if (!argv.tokenTypesSupported) {
+    argv.tokenTypesSupported = ['legacyPop', 'dpop']
   }
 
   // Set up --no-*

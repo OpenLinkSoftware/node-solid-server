@@ -119,6 +119,17 @@ describe('ResourceMapper', () => {
         contentType: 'text/n3'
       })
 
+    itMapsUrl(mapper, 'a URL with a file extension having more than one possible content type',
+      {
+        url: 'http://localhost/space/foo.mp3',
+        contentType: 'audio/mp3',
+        createIfNotExists: true
+      },
+      {
+        path: `${rootPath}space/foo.mp3`,
+        contentType: 'audio/mp3'
+      })
+
     // GET/HEAD/POST/DELETE/PATCH base cases
 
     itMapsUrl(mapper, 'a URL of a non-existing file',
@@ -126,7 +137,7 @@ describe('ResourceMapper', () => {
         url: 'http://localhost/space/foo.html'
       },
       [/* no files */],
-      new Error('File not found'))
+      new Error('Resource not found: /space/foo.html'))
 
     itMapsUrl(mapper, 'a URL of an existing file with extension',
       {
@@ -239,7 +250,8 @@ describe('ResourceMapper', () => {
 
     itMapsUrl(mapper, 'a URL ending with a slash when index.html is available',
       {
-        url: 'http://localhost/space/'
+        url: 'http://localhost/space/',
+        contentType: 'text/html'
       },
       [
         `${rootPath}space/index.html`,
@@ -477,6 +489,13 @@ describe('ResourceMapper', () => {
         url: 'http://localhost/space/foo%20bar%20bar.html',
         contentType: 'text/html'
       })
+
+    itMapsFile(mapper, 'a file with even stranger disallowed IRI characters',
+      { path: `${rootPath}space/Blog discovery for the future? · Issue #96 · scripting:Scripting-News · GitHub.pdf` },
+      {
+        url: 'http://localhost/space/Blog%20discovery%20for%20the%20future%3F%20%C2%B7%20Issue%20%2396%20%C2%B7%20scripting%3AScripting-News%20%C2%B7%20GitHub.pdf',
+        contentType: 'application/pdf'
+      })
   })
 
   describe('A ResourceMapper instance for a multi-host setup', () => {
@@ -534,7 +553,7 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file on a host',
       {
-        path: `${rootPath}space/foo.html`,
+        path: `${rootPath}example.org/space/foo.html`,
         hostname: 'example.org'
       },
       {
@@ -549,7 +568,7 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file on a host',
       {
-        path: `${rootPath}space/foo.html`,
+        path: `${rootPath}example.org/space/foo.html`,
         hostname: 'example.org'
       },
       {
@@ -563,10 +582,11 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file with the port',
       {
-        path: `${rootPath}space/foo.html`
+        path: `${rootPath}example.org/space/foo.html`,
+        hostname: 'example.org'
       },
       {
-        url: 'http://localhost:81/space/foo.html',
+        url: 'http://localhost:81/example.org/space/foo.html',
         contentType: 'text/html'
       })
   })
@@ -576,7 +596,7 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file with the port',
       {
-        path: `${rootPath}space/foo.html`,
+        path: `${rootPath}example.org/space/foo.html`,
         hostname: 'example.org'
       },
       {
@@ -590,10 +610,11 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file with the port',
       {
-        path: `${rootPath}space/foo.html`
+        path: `${rootPath}example.org/space/foo.html`,
+        hostname: 'example.org'
       },
       {
-        url: 'https://localhost:81/space/foo.html',
+        url: 'https://localhost:81/example.org/space/foo.html',
         contentType: 'text/html'
       })
   })
@@ -603,13 +624,24 @@ describe('ResourceMapper', () => {
 
     itMapsFile(mapper, 'a file with the port',
       {
-        path: `${rootPath}space/foo.html`,
+        path: `${rootPath}example.org/space/foo.html`,
         hostname: 'example.org'
       },
       {
         url: 'https://example.org:81/space/foo.html',
         contentType: 'text/html'
       })
+  })
+
+  describe('A ResourceMapper instance for an HTTPS host with non-default port in a multi-host setup', () => {
+    const mapper = new ResourceMapper({ rootUrl: 'https://localhost:81/', rootPath, includeHost: true })
+
+    it('throws an error when there is an improper file path', () => {
+      return expect(mapper.mapFileToUrl({
+        path: `${rootPath}example.orgspace/foo.html`,
+        hostname: 'example.org'
+      })).to.be.rejectedWith(Error, 'Path must start with hostname (/example.org)')
+    })
   })
 })
 

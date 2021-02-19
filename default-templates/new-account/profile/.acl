@@ -11,7 +11,7 @@
 {{/if}}
     acl:origin <{{accountUri}}>;
     acl:accessTo <./>;
-    acl:defaultForNew <./>;
+    acl:default <./>;
     acl:mode acl:Read, acl:Write, acl:Control.
 
 # The public has read permissions
@@ -19,5 +19,5 @@
     a acl:Authorization;
     acl:agentClass foaf:Agent;
     acl:accessTo <./>;
-    acl:defaultForNew <./>;
+    acl:default <./>;
     acl:mode acl:Read.

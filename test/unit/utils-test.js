@@ -1,6 +1,6 @@
-var assert = require('chai').assert
-
-var utils = require('../../lib/utils')
+const assert = require('chai').assert
+const { Headers } = require('node-fetch')
+const utils = require('../../lib/utils')
 
 describe('Utility functions', function () {
   describe('pathBasename', function () {
@@ -59,7 +59,7 @@ describe('Utility functions', function () {
 
   describe('fullUrlForReq()', () => {
     it('should extract a fully-qualified url from an Express request', () => {
-      let req = {
+      const req = {
         protocol: 'https:',
         get: (host) => 'example.com',
         baseUrl: '/',
@@ -73,33 +73,33 @@ describe('Utility functions', function () {
 
   describe('getContentType()', () => {
     describe('for Express headers', () => {
-      it('should default to text/plain', () => {
-        assert.equal(utils.getContentType({}), 'text/plain')
+      it('should not default', () => {
+        assert.equal(utils.getContentType({}), '')
       })
 
       it('should get a basic content type', () => {
-        assert.equal(utils.getContentType({'content-type': 'text/html'}), 'text/html')
+        assert.equal(utils.getContentType({ 'content-type': 'text/html' }), 'text/html')
       })
 
       it('should get a content type without its charset', () => {
-        assert.equal(utils.getContentType({'content-type': 'text/html; charset=us-ascii'}), 'text/html')
+        assert.equal(utils.getContentType({ 'content-type': 'text/html; charset=us-ascii' }), 'text/html')
       })
     })
 
     describe('for Fetch API headers', () => {
-      it('should default to text/plain', () => {
+      it('should not default', () => {
         // eslint-disable-next-line no-undef
-        assert.equal(utils.getContentType(new Headers({})), 'text/plain')
+        assert.equal(utils.getContentType(new Headers({})), '')
       })
 
       it('should get a basic content type', () => {
         // eslint-disable-next-line no-undef
-        assert.equal(utils.getContentType(new Headers({'content-type': 'text/html'})), 'text/html')
+        assert.equal(utils.getContentType(new Headers({ 'content-type': 'text/html' })), 'text/html')
       })
 
       it('should get a content type without its charset', () => {
         // eslint-disable-next-line no-undef
-        assert.equal(utils.getContentType(new Headers({'content-type': 'text/html; charset=us-ascii'})), 'text/html')
+        assert.equal(utils.getContentType(new Headers({ 'content-type': 'text/html; charset=us-ascii' })), 'text/html')
       })
     })
   })

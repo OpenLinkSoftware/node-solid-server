@@ -2,13 +2,13 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-body">
-        <form method="post" id="reg-form" action="/api/accounts/new">
+        <form method="post" action="/api/accounts/new" id="RegisterForm">
           {{> shared/error}}
 
           <div class="form-group">
             <label class="control-label" for="username">Username*</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="alice"
-                   required/>
+                   required value="{{username}}"/>
 
 	    {{#if multiuser}}
 	    <p>Your username should be a lower-case word with only
@@ -17,21 +17,19 @@
 	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
               document.write(window.location.host)
 	    </script></tt></p>
-	    <p>Your public WebID will be:
+	    <p>Your public Solid WebID will be:
 	    <tt>https://<span class="editable-username">alice</span>.<script type="text/javascript">
               document.write(window.location.host)
 	    </script>/profile/card#me</tt></p>
 
-            <p>Your <em>POD's URL</em> identifies the homepage of your 
-            Solid-based Personal Data Space. By default, it is readable 
-            by the public, but 100% configurable by you i.e., you can 
-            choose to make it private or only accessible to groups of users 
-            via attribute-based access controls (data access policies).</p>
+	    <p>Your <em>POD URL</em> is like the homepage for your Solid
+	    pod. By default, it is readable by the public, but you can
+	    always change that if you like by changing the access
+	    control.</p>
 
-            <p>Your <em>WebID</em> is your globally unique name that you 
-            can use to identify and authenticate yourself across any 
-            HTTP-based network.</p>
-
+	    <p>Your <em>Solid WebID</em> is your globally unique name
+	    that you can use to identify and authenticate yourself with
+	    other PODs across the world.</p>
 	    {{/if}}
 
 	  </div>
@@ -56,21 +54,32 @@
 
           <div class="form-group">
             <label class="control-label" for="name">Name*</label>
-            <input type="text" class="form-control" name="name" id="name" required/>
+            <input type="text" class="form-control" name="name" id="name" required value="{{name}}"/>
           </div>
 
           <div class="form-group">
             <label class="control-label" for="email">Email*</label>
-            <input type="email" class="form-control" name="email" id="email"/>
-            <span class="help-block">Your email will only used for account recovery</span>
+            <input type="email" class="form-control" name="email" id="email" value="{{email}}"/>
+            <span class="help-block">Your email will only be used for account recovery</span>
           </div>
 
-          <div class="form-group">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="connectExternalWebId" value="true" id="ConnectExternalWebId" {{#if connectExternalWebId}}checked{{/if}}/>
+              Connect to External WebID (<strong>Advanced feature</strong>)
+            </label>
+          </div>
+
+          <div class="form-group hidden" id="ExternalWebId">
             <label class="control-label" for="externalWebId">External WebID:</label>
+            <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{externalWebId}}"/>
+            <button type="button" class="btn btn-primary" id="detect_webid">Detect WebID</button>
+<!--
             <input type="text" class="form-control" name="externalWebId" id="externalWebId" value="{{webid}}" />
             <button type="button" class="btn btn-primary" id="detect_webid">Detect WebID</button>
+-->
             <span class="help-block">
-                We will generate a Web ID when you register, but if you already have a Web ID hosted elsewhere that you'd prefer to use to log in, enter it here
+              By connecting this account with an existing WebID, you can use that WebID to authenticate with the new account.
             </span>
           </div>
 
@@ -78,7 +87,7 @@
             {{#if tocUri}}
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" name="acceptToc" value="true">
+                  <input type="checkbox" name="acceptToc" value="true" {{#if acceptToc}}checked{{/if}}>
                   I agree to the <a href="{{tocUri}}" target="_blank">Terms &amp; Conditions</a> of this service
                 </label>
               </div>
@@ -162,5 +171,22 @@
         })
   });
 
+  window.addEventListener('DOMContentLoaded', function () {
+    var connect = document.getElementById('ConnectExternalWebId')
+    var container = document.getElementById('ExternalWebId')
+    container.classList.toggle('hidden', !connect.checked)
+    connect.addEventListener('change', function () {
+      container.classList.toggle('hidden', !connect.checked)
+    })
+
+//??TODO check the new next
+    var form = document.getElementById('RegisterForm')
+    var externalWebIdField = document.getElementById('externalWebId')
+    form.addEventListener('submit', function () {
+      if (!connect.checked) {
+        externalWebIdField.value = ''
+      }
+    })
+  })
 </script>
 

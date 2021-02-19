@@ -7,9 +7,11 @@ shift
 export DEBUG="solid:*"
 #export DEBUG="*"
 
+export NODE_OPTIONS="--tls-max-v1.2 "
+
 # Disable rejectUnauthorized when starting the server
 if [ "$COMMAND" == "start" ]; then
-  ADD_FLAGS="--no-reject-unauthorized"
+  ADD_FLAGS="--no-reject-unauthorized "
   export NODE_TLS_REJECT_UNAUTHORIZED=0
 fi
 

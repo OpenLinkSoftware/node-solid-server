@@ -20,6 +20,16 @@ describe('Header handler', () => {
     request = supertest(server)
   })
 
+  describe('MS-Author-Via', () => {
+    describeHeaderTest('read/append for the public', {
+      resource: '/public-ra',
+      headers: {
+        'MS-Author-Via': 'SPARQL',
+        'Access-Control-Expose-Headers': /(^|,\s*)MS-Author-Via(,|$)/
+      }
+    })
+  })
+
   describe('WAC-Allow', () => {
     describeHeaderTest('read/append for the public', {
       resource: '/public-ra',
@@ -37,20 +47,22 @@ describe('Header handler', () => {
       }
     })
 
-    describeHeaderTest('read/write/append/control for the user, nothing for the public', {
-      resource: '/user-rwac-public-0',
-      headers: {
-        'WAC-Allow': 'user="read write append control",public=""',
-        'Access-Control-Expose-Headers': /(^|,\s*)WAC-Allow(,|$)/
-      }
-    })
+    // FIXME: https://github.com/solid/node-solid-server/issues/1502
+    //  describeHeaderTest('read/write/append/control for the user, nothing for the public', {
+    //    resource: '/user-rwac-public-0',
+    //    headers: {
+    //      'WAC-Allow': 'user="read write append control",public=""',
+    //      'Access-Control-Expose-Headers': /(^|,\s*)WAC-Allow(,|$)/
+    //    }
+    //  })
   })
 
   function describeHeaderTest (label, { resource, headers }) {
     describe(`a resource that is ${label}`, () => {
       // Retrieve the response headers
-      let response = {}
-      before(async () => {
+      const response = {}
+      before(async function () {
+        this.timeout(10000) // FIXME: https://github.com/solid/node-solid-server/issues/1443
         const { headers } = await request.get(resource)
         response.headers = headers
       })

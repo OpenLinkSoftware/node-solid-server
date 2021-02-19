@@ -1,35 +1,49 @@
-var chai = require('chai')
-var assert = chai.assert
+const chai = require('chai')
+const assert = chai.assert
 chai.use(require('chai-as-promised'))
-var $rdf = require('rdflib')
-var ns = require('solid-namespace')($rdf)
-var LDP = require('../../lib/ldp')
-var path = require('path')
-var stringToStream = require('../../lib/utils').stringToStream
-var randomBytes = require('randombytes')
-var ResourceMapper = require('../../lib/resource-mapper')
+const $rdf = require('rdflib')
+const ns = require('solid-namespace')($rdf)
+const LDP = require('../../lib/ldp')
+const path = require('path')
+const stringToStream = require('../../lib/utils').stringToStream
+const randomBytes = require('randombytes')
+const ResourceMapper = require('../../lib/resource-mapper')
 
 // Helper functions for the FS
-var rm = require('./../utils').rm
-var write = require('./../utils').write
+const rm = require('./../utils').rm
+const write = require('./../utils').write
 // var cp = require('./utils').cp
-var read = require('./../utils').read
-var fs = require('fs')
+const read = require('./../utils').read
+const fs = require('fs')
 
 describe('LDP', function () {
-  var root = path.join(__dirname, '..')
+  const root = path.join(__dirname, '..')
 
-  var resourceMapper = new ResourceMapper({
+  const resourceMapper = new ResourceMapper({
     rootUrl: 'https://localhost:8443/',
     rootPath: root,
     includeHost: false
   })
 
-  var ldp = new LDP({
+  const ldp = new LDP({
     resourceMapper,
     serverUri: 'https://localhost',
     multiuser: true,
     webid: false
+  })
+
+  describe('cannot delete podRoot', function () {
+    it('should error 405 when deleting podRoot', () => {
+      return ldp.delete('/').catch(err => {
+        assert.equal(err.status, 405)
+      })
+    })
+    it.skip('should error 405 when deleting podRoot/.acl', async () => {
+      await ldp.put('/.acl', '', 'text/turtle')
+      return ldp.delete('/.acl').catch(err => {
+        assert.equal(err.status, 405)
+      })
+    })
   })
 
   describe('readResource', function () {
@@ -77,18 +91,18 @@ describe('LDP', function () {
 
   describe('getGraph', () => {
     it('should read and parse an existing file', () => {
-      let uri = 'https://localhost:8443/resources/sampleContainer/example1.ttl'
+      const uri = 'https://localhost:8443/resources/sampleContainer/example1.ttl'
       return ldp.getGraph(uri)
         .then(graph => {
           assert.ok(graph)
-          let fullname = $rdf.namedNode('http://example.org/stuff/1.0/fullname')
-          let match = graph.match(null, fullname)
+          const fullname = $rdf.namedNode('http://example.org/stuff/1.0/fullname')
+          const match = graph.match(null, fullname)
           assert.equal(match[0].object.value, 'Dave Beckett')
         })
     })
 
     it('should throw a 404 error on a non-existing file', (done) => {
-      let uri = 'https://localhost:8443/resources/nonexistent.ttl'
+      const uri = 'https://localhost:8443/resources/nonexistent.ttl'
       ldp.getGraph(uri)
         .catch(error => {
           assert.ok(error)
@@ -100,18 +114,18 @@ describe('LDP', function () {
 
   describe('putGraph', () => {
     it('should serialize and write a graph to a file', () => {
-      let originalResource = '/resources/sampleContainer/example1.ttl'
-      let newResource = '/resources/sampleContainer/example1-copy.ttl'
+      const originalResource = '/resources/sampleContainer/example1.ttl'
+      const newResource = '/resources/sampleContainer/example1-copy.ttl'
 
-      let uri = 'https://localhost:8443' + originalResource
+      const uri = 'https://localhost:8443' + originalResource
       return ldp.getGraph(uri)
         .then(graph => {
-          let newUri = 'https://localhost:8443' + newResource
+          const newUri = 'https://localhost:8443' + newResource
           return ldp.putGraph(graph, newUri)
         })
         .then(() => {
           // Graph serialized and written
-          let written = read('sampleContainer/example1-copy.ttl')
+          const written = read('sampleContainer/example1-copy.ttl')
           assert.ok(written)
         })
         // cleanup
@@ -122,60 +136,74 @@ describe('LDP', function () {
 
   describe('put', function () {
     it.skip('should write a file in an existing dir', () => {
-      var stream = stringToStream('hello world')
+      const stream = stringToStream('hello world')
       return ldp.put('/resources/testPut.txt', stream, 'text/plain').then(() => {
-        var found = read('testPut.txt')
+        const found = read('testPut.txt')
         rm('testPut.txt')
         assert.equal(found, 'hello world')
       })
     })
 
-    it('should fail if a trailing `/` is passed', () => {
-      var stream = stringToStream('hello world')
+    it.skip('should fail if a trailing `/` is passed', () => {
+      const stream = stringToStream('hello world')
       return ldp.put('/resources/', stream, 'text/plain').catch(err => {
         assert.equal(err.status, 409)
       })
     })
 
     it.skip('with a larger file to exceed allowed quota', function () {
-      var randstream = stringToStream(randomBytes(2100))
+      const randstream = stringToStream(randomBytes(2100))
       return ldp.put('localhost', '/resources/testQuota.txt', randstream).catch((err) => {
         assert.notOk(err)
       })
     })
     it('should fail if a over quota', function () {
-      var hellostream = stringToStream('hello world')
+      const hellostream = stringToStream('hello world')
       return ldp.put('localhost', '/resources/testOverQuota.txt', hellostream).catch((err) => {
         assert.equal(err.status, 413)
       })
     })
 
-    it('should fail if a trailing `/` is passed without content type', () => {
-      var stream = stringToStream('hello world')
+    it.skip('should fail if a trailing `/` is passed without content type', () => {
+      const stream = stringToStream('hello world')
       return ldp.put('/resources/', stream, null).catch(err => {
         assert.equal(err.status, 409)
       })
     })
 
     it('should fail if no content type is passed', () => {
-      var stream = stringToStream('hello world')
+      const stream = stringToStream('hello world')
       return ldp.put('/resources/testPut.txt', stream, null).catch(err => {
+        assert.equal(err.status, 400)
+      })
+    })
+
+    it('should fail if file.acl and content type not text/turtle', () => {
+      const stream = stringToStream('hello world')
+      return ldp.put('/resources/testPut.txt.acl', stream, 'text/plain').catch(err => {
         assert.equal(err.status, 415)
       })
     })
   })
 
   describe('delete', function () {
-    it('should error when deleting a non-existing file', () => {
+    // FIXME: https://github.com/solid/node-solid-server/issues/1502
+    it.skip('should error when deleting a non-existing file', () => {
       return assert.isRejected(ldp.delete('/resources/testPut.txt'))
     })
 
-    it.skip('should delete a file in an existing dir', async () => {
+    it.skip('should delete a file with ACL in an existing dir', async () => {
       // First create a dummy file
-      var stream = stringToStream('hello world')
+      const stream = stringToStream('hello world')
       await ldp.put('/resources/testPut.txt', stream, 'text/plain')
+      await ldp.put('/resources/testPut.txt.acl', stream, 'text/turtle')
       // Make sure it exists
       fs.stat(ldp.resourceMapper._rootPath + '/resources/testPut.txt', function (err) {
+        if (err) {
+          throw err
+        }
+      })
+      fs.stat(ldp.resourceMapper._rootPath + '/resources/testPut.txt.acl', function (err) {
         if (err) {
           throw err
         }
@@ -189,11 +217,16 @@ describe('LDP', function () {
           throw new Error('file still exists')
         }
       })
+      fs.stat(ldp.resourceMapper._rootPath + '/resources/testPut.txt.acl', function (err, s) {
+        if (!err) {
+          throw new Error('file still exists')
+        }
+      })
     })
 
     it.skip('should fail to delete a non-empty folder', async () => {
       // First create a dummy file
-      var stream = stringToStream('hello world')
+      const stream = stringToStream('hello world')
       await ldp.put('/resources/dummy/testPutBlocking.txt', stream, 'text/plain')
       // Make sure it exists
       fs.stat(ldp.resourceMapper._rootPath + '/resources/dummy/testPutBlocking.txt', function (err) {
@@ -208,7 +241,7 @@ describe('LDP', function () {
 
     it.skip('should fail to delete nested non-empty folders', async () => {
       // First create a dummy file
-      var stream = stringToStream('hello world')
+      const stream = stringToStream('hello world')
       await ldp.put('/resources/dummy/dummy2/testPutBlocking.txt', stream, 'text/plain')
       // Make sure it exists
       fs.stat(ldp.resourceMapper._rootPath + '/resources/dummy/dummy2/testPutBlocking.txt', function (err) {
@@ -287,14 +320,14 @@ describe('LDP', function () {
 
       return ldp.listContainer(path.join(__dirname, '../resources/sampleContainer/'), 'https://server.tld/resources/sampleContainer/', '', 'server.tld')
         .then(data => {
-          var graph = $rdf.graph()
+          const graph = $rdf.graph()
           $rdf.parse(
             data,
             graph,
             'https://localhost:8443/resources/sampleContainer',
             'text/turtle')
 
-          var basicContainerStatements = graph
+          const basicContainerStatements = graph
             .each(
               $rdf.sym('https://localhost:8443/resources/sampleContainer/basicContainerFile.ttl'),
               ns.rdf('type'),
@@ -302,13 +335,13 @@ describe('LDP', function () {
             )
             .map(d => { return d.uri })
 
-          let expectedStatements = [
+          const expectedStatements = [
             'http://www.w3.org/ns/iana/media-types/text/turtle#Resource',
             'http://www.w3.org/ns/ldp#Resource'
           ]
           assert.deepEqual(basicContainerStatements.sort(), expectedStatements)
 
-          var containerStatements = graph
+          const containerStatements = graph
             .each(
               $rdf.sym('https://localhost:8443/resources/sampleContainer/containerFile.ttl'),
               ns.rdf('type'),

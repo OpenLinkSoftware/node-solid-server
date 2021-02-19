@@ -6,7 +6,7 @@ const expect = require('chai').expect
 
 describe('OIDC error handling', function () {
   const serverUri = 'https://localhost:3457'
-  var ldpHttpsServer
+  let ldpHttpsServer
   const rootPath = path.join(__dirname, '../resources/accounts/errortests')
   const configPath = path.join(__dirname, '../resources/config')
   const dbPath = path.join(__dirname, '../resources/accounts/db')
@@ -93,6 +93,12 @@ describe('OIDC error handling', function () {
           .set('Authorization', 'Bearer ' + expiredToken)
           .expect('WWW-Authenticate', 'Bearer realm="https://localhost:3457", scope="openid webid", error="invalid_token", error_description="Access token is expired"')
           .expect(401)
+      })
+
+      it('should return a 200 if the resource is public', () => {
+        return server.get('/public/')
+          .set('Authorization', 'Bearer ' + expiredToken)
+          .expect(200)
       })
     })
   })
