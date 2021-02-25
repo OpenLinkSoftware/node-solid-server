@@ -21,7 +21,7 @@ const mockUserStore = {
 
 const authMethod = 'oidc'
 const host = SolidHost.from({ serverUri: 'https://localhost:8443' })
-const accountManager = AccountManager.from({ host, authMethod, multiuser: true })
+const accountManager = AccountManager.from({ host, authMethod })
 const localAuth = { password: true, tls: true }
 
 describe('LoginRequest', () => {

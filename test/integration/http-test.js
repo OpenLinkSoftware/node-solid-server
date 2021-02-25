@@ -86,7 +86,7 @@ describe('HTTP APIs', function () {
           .expect('Access-Control-Allow-Origin', 'http://example.com')
           .expect('Access-Control-Allow-Credentials', 'true')
           .expect('Access-Control-Allow-Methods', 'OPTIONS,HEAD,GET,PATCH,POST,PUT,DELETE')
-          .expect('Access-Control-Expose-Headers', 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate, On-Behalf-Of, webid-tls')
+          .expect('Access-Control-Expose-Headers', 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate, On-Behalf-Of, webid-tls, MS-Author-Via')
           .expect(204, done)
       })
 
@@ -485,6 +485,24 @@ describe('HTTP APIs', function () {
         .send(putRequestBody)
         .set('content-type', 'text/plain')
         .expect(415, done)
+    })
+    it('should reject create .acl resource, if body is not valid turtle', function (done) {
+      server.put('/put-resource-1.acl')
+        .send('bad turtle content')
+        .set('content-type', 'text/turtle')
+        .expect(400, done)
+    })
+    it('should reject create .meta resource, if contentType not text/turtle', function (done) {
+      server.put('/.meta')
+        .send(putRequestBody)
+        .set('content-type', 'text/plain')
+        .expect(415, done)
+    })
+    it('should reject create .meta resource, if body is not valid turtle', function (done) {
+      server.put('/.meta')
+        .send(JSON.stringify({}))
+        .set('content-type', 'text/turtle')
+        .expect(400, done)
     })
     it('should create directories if they do not exist', function (done) {
       server.put('/foo/bar/baz.ttl')
